@@ -19,6 +19,7 @@ import notificationRoutes from './routes/notification.route.js'
 import likePostRoutes from './routes/likepost.route.js'
 import likeUserRoutes from './routes/likeuser.route.js'
 import buyGiftRoutes from './routes/buygift.route.js'
+import giftRoutes from './routes/gift.route.js'
 import Notification from "./models/notification.model.js"
 import User from "./models/user.model.js"
 
@@ -92,5 +93,6 @@ app.use("/api/notification", notificationRoutes)
 app.use("/api/likepost", likePostRoutes)
 app.use("/api/likeuser", likeUserRoutes)
 app.use("/api/buygift", buyGiftRoutes)
+app.use("/api/gift", giftRoutes)
 
 server.listen(port, () => console.log(`backend running on ${port} port`))

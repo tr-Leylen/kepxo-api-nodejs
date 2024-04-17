@@ -1,5 +1,6 @@
 import BuyGift from "../models/buygift.model.js"
 import Gift from "../models/gift.model.js"
+import User from "../models/user.model.js"
 
 export const buyGift = async (req, res) => {
     try {
@@ -9,8 +10,16 @@ export const buyGift = async (req, res) => {
         if (!gift) return res.status(404).json('Gift not found')
         const giftBuyingExists = await BuyGift.find({ userId, giftId })
         if (giftBuyingExists.length === 0) {
-            const giftBuying = await BuyGift.create({ userId, giftId })
-            res.status(201).json(giftBuying)
+            const user = await User.findById(userId)
+            const { password: pass, ...userInfo } = user._doc
+            if (user.score >= gift.score) {
+                await BuyGift.create({ userId, giftId })
+                let newScore = user.score - gift.score
+                const updatedUser = await User.findByIdAndUpdate(userId, { ...userInfo, score: newScore }, { new: true })
+                res.status(201).json(updatedUser)
+            } else {
+                res.status(400).json("you don't have enough scores")
+            }
         } else {
             res.status(400).json('User already buying this gift')
         }

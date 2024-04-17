@@ -2,6 +2,8 @@ import Gift from "../models/gift.model.js"
 
 export const createGift = async (req, res) => {
     try {
+        const { score } = req.body
+        if (score < 0) return res.status(400).json('Score must be 0 and higher')
         const newGift = await Gift.create({ ...req.body })
         res.status(201).json(newGift)
     } catch (error) {
