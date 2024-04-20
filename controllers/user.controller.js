@@ -75,7 +75,10 @@ export const likedCourses = async (req, res) => {
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
         const courses = await LikeCourse.find({ userId })
-        res.status(200).json(courses)
+        const courseIds = courses.map(item => {
+            return item._id
+        })
+        res.status(200).json(courseIds)
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -97,7 +100,10 @@ export const blockedUsers = async (req, res) => {
     try {
         const userId = req.userId
         const blockedList = await BlockUser.find({ userId })
-        res.status(200).json(blockedList)
+        const blokedUserIds = blockedList.map(item => {
+            return item._id
+        })
+        res.status(200).json(blokedUserIds)
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }

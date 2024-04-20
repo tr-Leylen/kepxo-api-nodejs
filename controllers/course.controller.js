@@ -82,7 +82,10 @@ export const courseLikedUsers = async (req, res) => {
     try {
         const courseId = req.params.id
         const likeArray = await LikeCourse.find({ courseId })
-        return res.status(200).json(likeArray)
+        const likedUserIds = likeArray.map(item => {
+            return item._id
+        })
+        return res.status(200).json(likedUserIds)
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
