@@ -1,9 +1,13 @@
 import BuyCourse from "../models/buycourse.model.js"
+import Category from "../models/category.model.js"
 import Course from "../models/course.model.js"
 import LikeCourse from "../models/likecourse.model.js"
 
 export const createCourse = async (req, res) => {
     try {
+        const categoryId = req.body.categoryId
+        const category = await Category.findById(categoryId)
+        if (!category) return res.status(404).json('Category not found')
         const course = await Course.create(req.body)
         res.status(201).json(course)
     } catch (error) {
@@ -15,6 +19,9 @@ export const updateCourse = async (req, res) => {
     try {
         const role = req.userRole
         const userId = req.userId
+        const categoryId = req.body.categoryId
+        const category = await Category.findById(categoryId)
+        if (!category) return res.status(404).json('Category not found')
         const course = await Course.findById(req.params.id)
         if (!course) return res.status(404).json("Course not found")
         if (role === 'teacher' && userId !== course.ownerId) return res.status(401).json('you can only update your own course')
