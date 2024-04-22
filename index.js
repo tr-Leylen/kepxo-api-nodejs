@@ -22,6 +22,7 @@ import buyGiftRoutes from './routes/buygift.route.js'
 import giftRoutes from './routes/gift.route.js'
 import Notification from "./models/notification.model.js"
 import User from "./models/user.model.js"
+import categoryRoutes from "./routes/category.route.js"
 
 dotenv.config()
 const port = 4000
@@ -94,5 +95,6 @@ app.use("/api/likepost", likePostRoutes)
 app.use("/api/likeuser", likeUserRoutes)
 app.use("/api/buygift", buyGiftRoutes)
 app.use("/api/gift", giftRoutes)
+app.use("/api/category", categoryRoutes)
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
