@@ -5,6 +5,8 @@ import { Server } from "socket.io"
 import http from 'http'
 import cors from 'cors'
 import jwt from 'jsonwebtoken'
+import swaggerJSDoc from "swagger-jsdoc"
+import swaggerUi from "swagger-ui-express"
 import authRoutes from './routes/auth.route.js'
 import courseRoutes from './routes/course.route.js'
 import buycourseRoutes from './routes/buycourse.route.js'
@@ -34,7 +36,30 @@ const io = new Server(server, {
     }
 })
 // app.use(cors())
+
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Kepxo api documentations',
+            version: '1.0.0'
+        },
+        servers: [
+            {
+                url: 'http://localhost:4000/'
+            }
+        ],
+        security: [{ bearerAuth: [] }]
+    },
+    apis: [
+        './routes/*.js'
+    ],
+}
+
+const swaggerSpec = swaggerJSDoc(options)
+
 app.use(express.json())
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 mongoose.connect(process.env.MONGO)
     .then(() => console.log("Connected to DB"))
