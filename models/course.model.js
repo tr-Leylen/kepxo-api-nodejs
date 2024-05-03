@@ -34,6 +34,10 @@ const courseSchema = new mongoose.Schema({
     },
     description: {
         type: String
+    },
+    star: {
+        type: Number,
+        default: 0
     }
 })
 
