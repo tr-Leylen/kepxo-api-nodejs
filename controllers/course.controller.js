@@ -6,12 +6,14 @@ import LikeCourse from "../models/likecourse.model.js"
 export const createCourse = async (req, res) => {
     try {
         const categoryId = req.body.categoryId
+        const ownerId = req.userId
+        const courseData = { ...req.body, ownerId }
         const category = await Category.findById(categoryId)
         if (!category) return res.status(404).json('Category not found')
-        const course = await Course.create(req.body)
+        const course = await Course.create(courseData)
         res.status(201).json(course)
     } catch (error) {
-        res.status(500).json(error)
+        res.status(500).json('Internal Server Error')
     }
 }
 
@@ -53,6 +55,16 @@ export const getCourse = async (req, res) => {
         const course = await Course.findById(req.params.id)
         if (!course) return res.status(404).json('Course not found')
         res.status(200).json(course)
+    } catch (error) {
+        res.status(500).json('Internal Server Error')
+    }
+}
+
+export const getTeacherCourses = async (req, res) => {
+    try {
+        const userId = req.params.id
+        const courses = await Course.find({ ownerId: userId })
+        res.status(200).json(courses)
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
