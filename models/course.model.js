@@ -38,6 +38,10 @@ const courseSchema = new mongoose.Schema({
     star: {
         type: Number,
         default: 0
+    },
+    accepted:{
+        type: Boolean,
+        default: false
     }
 })
 
