@@ -39,9 +39,13 @@ const courseSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    accepted:{
+    accepted: {
         type: Boolean,
         default: false
+    },
+    enable: {
+        type: Boolean,
+        default: true
     }
 })
 

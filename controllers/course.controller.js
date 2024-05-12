@@ -46,7 +46,7 @@ export const deleteCourse = async (req, res) => {
         if (role === 'teacher' && userId !== course.ownerId) return res.status(401).json('you can only delete your own course')
         const courseBuyedList = await BuyCourse.find({ courseId: req.params.id })
         courseBuyedList.map(async item => await BuyCourse.findByIdAndDelete(item._id))
-        await Course.findByIdAndDelete(req.params.id)
+        await Course.findByIdAndUpdate(req.params.id, { enable: !course.enable }, { new: true })
         res.status(200).json("Course deleted")
     } catch (error) {
         res.status(500).json('Internal Server Error')
