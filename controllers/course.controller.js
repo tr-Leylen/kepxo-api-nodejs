@@ -117,11 +117,13 @@ export const courseLikedUsers = async (req, res) => {
 export const acceptCourse = async (req, res) => {
     try {
         const courseId = req.params.id
+        const score = req.body.score
         const course = await Course.findById(courseId)
         if (!course) return res.status(404).json('Course not found')
-        const updatedCourse = await Course.findByIdAndUpdate(courseId, { accepted: !course.accepted }, { new: true })
+        const updatedCourse = await Course.findByIdAndUpdate(courseId, { accepted: !course.accepted, score }, { new: true })
         res.status(200).json(updatedCourse)
     } catch (error) {
+        console.log(error)
         res.status(500).json('Internal Server Error')
     }
 }
@@ -129,6 +131,15 @@ export const acceptCourse = async (req, res) => {
 export const getNoAcceptedCourses = async (req, res) => {
     try {
         const courses = await Course.find({ accepted: false })
+        res.status(200).json(courses)
+    } catch (error) {
+        res.status(500).json('Internal Server Error')
+    }
+}
+
+export const getAllCoursesAdmin = async (req, res) => {
+    try {
+        const courses = await Course.find({ accepted: true })
         res.status(200).json(courses)
     } catch (error) {
         res.status(500).json('Internal Server Error')
