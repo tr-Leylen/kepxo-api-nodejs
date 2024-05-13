@@ -4,7 +4,7 @@ import { verifyUser } from '../utils/UserMiddleware.js'
 
 const router = express.Router()
 
-router.post("/create", createTeam)
+router.post("/create", verifyUser, createTeam)
 router.get("/:id", getTeam)
 router.put("/changemember/:id", verifyUser, changeMember)
 router.put("/changename/:id", verifyUser, changeTeamName)

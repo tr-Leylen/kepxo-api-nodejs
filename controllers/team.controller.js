@@ -2,7 +2,11 @@ import Team from "../models/team.model.js"
 
 export const createTeam = async (req, res) => {
     try {
-        const team = await Team.create(req.body)
+        const actionUser = req.userId
+        const title = req.body.title
+        const userTeams = await Team.find({ members: actionUser })
+        if (userTeams.length > 0) return res.status(400).json('A user can only be in one team')
+        const team = await Team.create({ title, members: [actionUser] })
         res.status(201).json(team)
     } catch (error) {
         res.status(500).json('Internal Server Error')
@@ -23,6 +27,8 @@ export const changeMember = async (req, res) => {
     try {
         const teamId = req.params.id
         const memberId = req.body.memberId
+        const memberTeams = await Team.find({ members: memberId })
+        if(memberTeams.length>0) return res.status(400).json('A user can only be in one team')
         const actionUser = req.userId
         const team = await Team.findById(teamId)
         if (!team) return res.status(404).json("Team not found")
