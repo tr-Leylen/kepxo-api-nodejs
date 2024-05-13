@@ -1,4 +1,5 @@
 import Category from "../models/category.model.js"
+import Course from "../models/course.model.js"
 
 export const createCategory = async (req, res) => {
     try {
@@ -31,6 +32,7 @@ export const deleteCategory = async (req, res) => {
         const category = await Category.findById(categoryId)
         if (!category) return res.status(404).json('Category not found')
         await Category.findByIdAndDelete(categoryId)
+        await Course.deleteMany({ categoryId })
         res.status(200).json('Category deleted')
     } catch (error) {
         res.status(500).json('Internal Server Error')
