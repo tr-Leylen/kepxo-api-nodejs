@@ -7,9 +7,10 @@ export const createCourse = async (req, res) => {
     try {
         const categoryId = req.body.categoryId
         const ownerId = req.userId
+        const userRole = req.userRole
         const accepted = req.body.accepted
         if (accepted) return res.status(403).json("You don't set is accept property")
-        const courseData = { ...req.body, ownerId }
+        const courseData = { ...req.body, ownerId: userRole === "teacher" && ownerId }
         const category = await Category.findById(categoryId)
         if (!category) return res.status(404).json('Category not found')
         const course = await Course.create(courseData)
