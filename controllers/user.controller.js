@@ -140,3 +140,12 @@ export const userNotifications = async (req, res) => {
         res.status(500).json('Internal Server Error')
     }
 }
+
+export const getTeachers = async (req, res) => {
+    try {
+        const teachers = await User.find({ role: 'teacher' })
+        res.status(200).json(teachers)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}

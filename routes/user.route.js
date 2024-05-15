@@ -1,5 +1,5 @@
 import express from 'express'
-import { blockedUsers, deleteUser, getFollowers, getFollowings, getUser, likedCourses, scoreHistory, updateUser, userNotifications, userPosts } from '../controllers/user.controller.js';
+import { blockedUsers, deleteUser, getFollowers, getFollowings, getTeachers, getUser, likedCourses, scoreHistory, updateUser, userNotifications, userPosts } from '../controllers/user.controller.js';
 import { verifyUser } from '../utils/UserMiddleware.js';
 import { verifyLogin } from '../utils/LoginMiddleware.js';
 
@@ -15,5 +15,6 @@ router.get("/blockedusers", verifyUser, blockedUsers)
 router.get("/scorehistory", verifyUser, scoreHistory)
 router.get("/posts/:id", userPosts)
 router.get("/notifications", verifyLogin, userNotifications)
+router.get("/teachers", getTeachers)
 
 export default router;
