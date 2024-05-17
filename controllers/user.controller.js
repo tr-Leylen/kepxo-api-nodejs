@@ -10,6 +10,9 @@ import User from "../models/user.model.js"
 export const updateUser = async (req, res) => {
     try {
         const userId = req.params.id
+        if (req.userRole != "admin" && req.userId !== userId) {
+            return res.status(403).json('You can update only your own account')
+        }
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
         if (req.body.role && user?.role != "admin") return res.status(403).json("You can not change your role")
@@ -22,6 +25,9 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     try {
+        if (req.userRole != "admin" && req.userId !== req.params.id) {
+            return res.status(403).json('You can delete only your own account')
+        }
         const user = await User.findById(req.params.id)
         if (!user) return res.status(404).json('User not found')
         const userBuyList = await BuyCourse.find({ userId: req.params.id })
