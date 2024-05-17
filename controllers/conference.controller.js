@@ -35,7 +35,7 @@ export const getConference = async (req, res) => {
 
 export const deleteConference = async (req, res) => {
     try {
-        const conference = Conference.findById(req.params.id)
+        const conference = await Conference.findById(req.params.id)
         if (!conference) return res.status(404).json('Conference not found')
         await JoinConference.deleteMany({ conferenceId: req.params.id })
         await Conference.findByIdAndDelete(req.params.id)

@@ -28,6 +28,7 @@ import categoryRoutes from "./routes/category.route.js"
 import giftTypeRoutes from "./routes/gifttype.route.js"
 import hotelRoutes from "./routes/hotel.route.js"
 import conferenceRoutes from "./routes/conference.route.js"
+import joinconferenceRoutes from "./routes/joinconference.route.js"
 
 dotenv.config()
 const port = 4000
@@ -127,5 +128,6 @@ app.use("/api/category", categoryRoutes)
 app.use("/api/gifttype", giftTypeRoutes)
 app.use("/api/hotel", hotelRoutes)
 app.use("/api/conference", conferenceRoutes)
+app.use("/api/join-conference", joinconferenceRoutes)
 
 server.listen(port, () => console.log(`backend running on ${port} port`))

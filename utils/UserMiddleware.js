@@ -8,8 +8,10 @@ export const verifyUser = async (req, res, next) => {
         jwt.verify(token, process.env.JWT_SECRET, async (err, data) => {
             if (err) return res.status(403).json('Token is not valid')
             const user = await User.findById(data.id)
-            if (data.id !== req.params.id && user?.role != 'admin') return res.status(403).json('Permission denied')
+            if (!user) return res.status(404).json('User not found')
+            if (user.role != 'user') return res.status(403).json('Permission denied')
             req.userId = data.id
+            req.userRole = user.role
             return next()
         })
     } catch (error) {
