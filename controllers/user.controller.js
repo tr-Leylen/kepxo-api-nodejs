@@ -150,7 +150,8 @@ export const userNotifications = async (req, res) => {
 export const getTeachers = async (req, res) => {
     try {
         const teachers = await User.find({ role: 'teacher' })
-        res.status(200).json(teachers)
+        const teachersData = teachers.map(item => item._id)
+        res.status(200).json(teachersData)
     } catch (error) {
         res.status(500).json(error)
     }
@@ -163,7 +164,9 @@ export const getTeachersPaged = async (req, res) => {
         const teachers = await User.find({ role: 'teacher' })
             .skip(page * limit)
             .limit(limit)
-        res.status(200).json(teachers)
+
+        const teachersData = teachers.map(item => item._id)
+        res.status(200).json(teachersData)
     } catch (error) {
         res.status(500).json(error)
     }
@@ -176,7 +179,9 @@ export const getUsersPaged = async (req, res) => {
         const users = await User.find({ role: 'user' })
             .skip(page * limit)
             .limit(limit)
-        res.status(200).json(users)
+
+        const usersData = users.map(item => item._id)
+        res.status(200).json(usersData)
     } catch (error) {
         res.status(500).json(error)
     }
