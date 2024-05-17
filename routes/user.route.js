@@ -1,7 +1,8 @@
 import express from 'express'
-import { blockedUsers, deleteUser, getFollowers, getFollowings, getTeachers, getUser, likedCourses, scoreHistory, updateUser, userNotifications, userPosts } from '../controllers/user.controller.js';
+import { blockedUsers, deleteUser, getFollowers, getFollowings, getTeachers, getTeachersPaged, getUser, getUsersPaged, likedCourses, scoreHistory, updateUser, userNotifications, userPosts } from '../controllers/user.controller.js';
 import { verifyUser } from '../utils/UserMiddleware.js';
 import { verifyLogin } from '../utils/LoginMiddleware.js';
+import { verifyAdmin } from '../utils/AdminMiddleware.js';
 
 const router = express.Router()
 
@@ -16,5 +17,7 @@ router.get("/scorehistory", verifyUser, scoreHistory)
 router.get("/posts/:id", userPosts)
 router.get("/notifications", verifyLogin, userNotifications)
 router.get("/teachers", getTeachers)
+router.get("/teachers-paged?:page", getTeachersPaged)
+router.get("/users?:page", verifyAdmin, getUsersPaged)
 
 export default router;

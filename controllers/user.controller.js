@@ -149,3 +149,29 @@ export const getTeachers = async (req, res) => {
         res.status(500).json(error)
     }
 }
+
+export const getTeachersPaged = async (req, res) => {
+    try {
+        const limit = 9
+        const { page } = req.query
+        const teachers = await User.find({ role: 'teacher' })
+            .skip(page * limit)
+            .limit(limit)
+        res.status(200).json(teachers)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+export const getUsersPaged = async (req, res) => {
+    try {
+        const limit = 9
+        const { page } = req.query
+        const users = await User.find({ role: 'user' })
+            .skip(page * limit)
+            .limit(limit)
+        res.status(200).json(users)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
