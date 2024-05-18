@@ -30,9 +30,8 @@ export const deleteUser = async (req, res) => {
         }
         const user = await User.findById(req.params.id)
         if (!user) return res.status(404).json('User not found')
-        const userBuyList = await BuyCourse.find({ userId: req.params.id })
-        userBuyList.map(async item => await BuyCourse.findByIdAndDelete(item._id))
-        await User.findByIdAndDelete(req.params.id)
+        await BuyCourse.deleteMany({ userId: user._id })
+        await User.findByIdAndUpdate(user._id, { enable: req.userRole === 'admin' ? !user.enable : false })
         res.status(200).json('User deleted')
     } catch (error) {
         res.status(500).json('Internal Server Error')

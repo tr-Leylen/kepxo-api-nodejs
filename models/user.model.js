@@ -35,21 +35,6 @@ const userSchema = new mongoose.Schema({
     avatar: {
         type: String
     },
-    blockList: {
-        type: Array
-    },
-    favoriteCourses: {
-        type: Array
-    },
-    registeredCards: {
-        type: Array
-    },
-    myCourses: {
-        type: Array
-    },
-    scoreHistory: {
-        type: Array
-    },
     score: {
         type: Number,
         default: 0
@@ -57,6 +42,10 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         default: 'user'
+    },
+    enable: {
+        type: Boolean,
+        default: true
     }
 })
 

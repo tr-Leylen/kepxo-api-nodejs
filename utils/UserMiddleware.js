@@ -9,7 +9,7 @@ export const verifyUser = async (req, res, next) => {
             if (err) return res.status(403).json('Token is not valid')
             const user = await User.findById(data.id)
             if (!user) return res.status(404).json('User not found')
-            if (user.role != 'user') return res.status(403).json('Permission denied')
+            if (user.role === 'teacher') return res.status(403).json('Permission denied')
             req.userId = data.id
             req.userRole = user.role
             return next()
