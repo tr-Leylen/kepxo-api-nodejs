@@ -55,3 +55,12 @@ export const viewGiftType = async (req, res) => {
         res.status(500).json(error)
     }
 }
+
+export const getAllTypes = async (req, res) => {
+    try {
+        const types = await GiftType.find()
+        res.status(200).json(types)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
