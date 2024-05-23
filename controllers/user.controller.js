@@ -164,8 +164,12 @@ export const getTeachersPaged = async (req, res) => {
             .skip(page * limit)
             .limit(limit)
 
+        const totalCount = await User.countDocuments({ role: 'teacher' })
         const teachersData = teachers.map(item => item._id)
-        res.status(200).json(teachersData)
+        res.status(200).json({
+            data: teachersData,
+            totalPages: Math.ceil(totalCount / limit)
+        })
     } catch (error) {
         res.status(500).json(error)
     }
@@ -178,9 +182,13 @@ export const getUsersPaged = async (req, res) => {
         const users = await User.find({ role: 'user' })
             .skip(page * limit)
             .limit(limit)
+        const totalCount = await User.countDocuments({ role: 'user' })
 
         const usersData = users.map(item => item._id)
-        res.status(200).json(usersData)
+        res.status(200).json({
+            data: usersData,
+            totalPages: Math.ceil(totalCount / limit)
+        })
     } catch (error) {
         res.status(500).json(error)
     }
