@@ -35,9 +35,8 @@ export const deleteGiftType = async (req, res) => {
     try {
         const id = req.params.id
         const giftType = await GiftType.findById(id)
-        if (!giftType) throw new Error('Gift type not found')
-        const giftTypeUsed = await Gift.find({ giftType: giftType._id })
-        if (giftTypeUsed.length > 0) throw new Error('Gift type used by some gifts')
+        if (!giftType) return res.status(404).json('Gift type not found');
+        await Gift.deleteMany({ giftType: id })
         await GiftType.findByIdAndDelete(id)
         res.status(200).json('Gift type deleted')
     } catch (error) {
@@ -49,7 +48,7 @@ export const viewGiftType = async (req, res) => {
     try {
         const id = req.params.id
         const giftType = await GiftType.findById(id)
-        if (!giftType) throw new Error('Gift type not found')
+        if (!giftType) return res.status(404).json('Gift type not found')
         res.status(200).json(giftType)
     } catch (error) {
         res.status(500).json(error)

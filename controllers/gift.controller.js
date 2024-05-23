@@ -4,10 +4,10 @@ import GiftType from "../models/gifttype.model.js";
 
 export const createGift = async (req, res) => {
     try {
-        const { score, giftTypeId } = req.body
+        const { score, giftType } = req.body
         if (score < 0) return res.status(400).json('Score must be 0 and higher');
-        const giftType = await GiftType.findById(giftTypeId)
-        if (!giftType) return res.status(404).json('Gift type not found')
+        const type = await GiftType.findById(giftType)
+        if (!type) return res.status(404).json('Gift type not found')
         const newGift = await Gift.create({ ...req.body });
         res.status(201).json(newGift)
     } catch (error) {
