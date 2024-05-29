@@ -149,8 +149,8 @@ export const userNotifications = async (req, res) => {
 export const getTeachers = async (req, res) => {
     try {
         const teachers = await User.find({ role: 'teacher' })
-        const teachersData = teachers.map(item => item._id)
-        res.status(200).json(teachersData)
+        // const teachersData = teachers.map(item => item._id)
+        res.status(200).json(teachers)
     } catch (error) {
         res.status(500).json(error)
     }
