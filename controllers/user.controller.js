@@ -193,3 +193,18 @@ export const getUsersPaged = async (req, res) => {
         res.status(500).json(error)
     }
 }
+
+export const getFriendDiscovery = async (req, res) => {
+    try {
+        const friends = await Follow.find({ userId: req.userId })
+        const friendsPosts = await Promise.all(
+            friends.map(async friend => {
+                const friendLastPost = (await Post.find({ userId: friend.followingId }))
+                return friendLastPost.at(-1);
+            })
+        )
+        res.status(200).json(friendsPosts)
+    } catch (error) {
+        return error
+    }
+}
