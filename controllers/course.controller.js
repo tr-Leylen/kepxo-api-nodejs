@@ -2,6 +2,7 @@ import BuyCourse from "../models/buycourse.model.js"
 import Category from "../models/category.model.js"
 import Course from "../models/course.model.js"
 import LikeCourse from "../models/likecourse.model.js"
+import StarCourse from "../models/starcourse.model.js"
 
 export const createCourse = async (req, res) => {
     try {
@@ -58,7 +59,11 @@ export const deleteCourse = async (req, res) => {
 export const getCourse = async (req, res) => {
     try {
         const course = await Course.findById(req.params.id)
-        if (!course) return res.status(404).json('Course not found')
+        if (!course) return res.status(404).json('Course not found');
+        const courseStars = await StarCourse.find({ courseId: req.params.id });
+        const starPoints = courseStars.reduce((acc, item) => acc += item.star, 0)
+        const starAvg = (starPoints / courseStars.length).toFixed(1)
+        course.star = starAvg
         res.status(200).json(course)
     } catch (error) {
         res.status(500).json('Internal Server Error')
