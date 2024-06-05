@@ -1,6 +1,9 @@
 import User from "../models/user.model.js"
 import bcryptjs from "bcryptjs"
 import jwt from 'jsonwebtoken'
+import nodemailer from 'nodemailer'
+
+const APP_PASS = '216430'
 
 export const login = async (req, res) => {
     try {
@@ -36,5 +39,50 @@ export const register = async (req, res) => {
         res.status(201).json({ token, ...newUserInfo })
     } catch (error) {
         res.status(500)
+    }
+}
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            secure: true,
+            port: 465,
+            host: 'smtp.gmail.com',
+            auth: {
+                user: 'elturanfcb@gmail.com',
+                pass: APP_PASS
+            }
+        })
+        const user = await User.findOne({ email: req.body.email })
+        if (!user) return res.status(404).json('User not found');
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const resetLink = `http://45.9.190.138:5173/forgot-password?token=${token}`
+
+        const mailOptions = {
+            from: 'elturanfcb@gmail.com',
+            to: user.email,
+            subject: 'Password Reset',
+            text: `Click the following link to reset your password: ${resetLink}`
+        }
+
+        await transporter.sendMail(mailOptions)
+        console.log(token)
+        res.status(200).json('Mail send')
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+    }
+}
+
+export const resetPassword = async (req, res) => {
+    const { token, newPassword } = req.body;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const hashedPassword = await bcryptjs.hash(newPassword, 10);
+        await User.updateOne({ _id: decoded.userId }, { password: hashedPassword });
+        res.status(200).json('Password reset')
+    } catch (error) {
+        res.status(500).json(error)
     }
 }

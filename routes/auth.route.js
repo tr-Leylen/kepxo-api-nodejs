@@ -1,5 +1,5 @@
 import express from 'express'
-import { login, register } from '../controllers/auth.controller.js'
+import { forgotPassword, login, register, resetPassword } from '../controllers/auth.controller.js'
 
 const router = express.Router()
 
@@ -68,5 +68,8 @@ router.post('/login', login)
  *               type: object
  */
 router.post('/register', register)
+
+router.post('/forgot-password', forgotPassword)
+router.post('/reset-password', resetPassword)
 
 export default router

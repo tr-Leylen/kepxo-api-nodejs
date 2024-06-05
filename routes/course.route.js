@@ -1,5 +1,5 @@
 import express from 'express'
-import { acceptCourse, courseLikedUsers, createCourse, deleteCourse, getAllCoursesAdmin, getCourse, getNoAcceptedCourses, getRecommendedCourses, getTeacherCourses, searchCourse, updateCourse } from '../controllers/course.controller.js';
+import { acceptCourse, courseLikedUsers, coursesForCategory, createCourse, deleteCourse, getAllCoursesAdmin, getCourse, getNoAcceptedCourses, getRecommendedCourses, getTeacherCourses, searchCourse, updateCourse } from '../controllers/course.controller.js';
 import { verifyTeacher } from '../utils/TeacherMiddleware.js';
 import { verifyAdmin } from '../utils/AdminMiddleware.js';
 
@@ -16,5 +16,6 @@ router.get("/recommended", getRecommendedCourses)
 router.get("/likedusers/:id", courseLikedUsers)
 router.get("/no-accepted", verifyAdmin, getNoAcceptedCourses)
 router.get("/all", verifyAdmin, getAllCoursesAdmin)
+router.get("/from-category/:categoryId", coursesForCategory)
 
 export default router;

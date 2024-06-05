@@ -152,3 +152,13 @@ export const getAllCoursesAdmin = async (req, res) => {
         res.status(500).json('Internal Server Error')
     }
 }
+
+export const coursesForCategory = async (req, res) => {
+    try {
+        const categoryId = req.params.categoryId
+        const courses = await Course.find({ categoryId })
+        res.status(200).json(courses)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
