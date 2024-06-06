@@ -208,3 +208,22 @@ export const getFriendDiscovery = async (req, res) => {
         return error
     }
 }
+
+export const getNormalDiscovery = async (req, res) => {
+    try {
+        const posts = await Post.find().limit(40)
+        let randomPosts = []
+        let array = Array.from({ length: posts.length }, (_, i) => i);
+        array.sort(() => Math.random() - 0.5)
+        for (let i = 0; i < array.length; i++) {
+            if (randomPosts.length === 20) {
+                break;
+            }
+            randomPosts.push(posts[array[i]])
+        }
+        res.status(200).json(randomPosts)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+    }
+}
