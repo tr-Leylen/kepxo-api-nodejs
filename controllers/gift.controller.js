@@ -60,3 +60,16 @@ export const getAllGifts = async (req, res) => {
         res.status(500).json(error)
     }
 }
+
+export const searchGift = async (req, res) => {
+    try {
+        const title = req.query.title
+        if (!title) return res.status(200).json([])
+        const gifts = await Gift.find({
+            title: { $regex: title, $options: 'i' }
+        })
+        res.status(200).json(gifts)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
