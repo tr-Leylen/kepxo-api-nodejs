@@ -23,25 +23,20 @@ export const getTeam = async (req, res) => {
     }
 }
 
-export const changeMember = async (req, res) => {
+export const deleteMember = async (req, res) => {
     try {
         const teamId = req.params.id
         const memberId = req.body.memberId
-        // const memberTeams = await Team.find({ members: memberId })
-        // if (memberTeams.length > 0) return res.status(400).json('A user can only be in one team')
         const actionUser = req.userId
         const userRole = req.userRole
         const team = await Team.findById(teamId)
         if (!team) return res.status(404).json("Team not found")
         if (actionUser != team.creatorId && userRole != 'admin') return res.status(401).json("You are not this team's creator")
         const memberExists = team.members.includes(memberId)
+        if (!memberExists) return res.status(404).json('User is not team`s member');
         let newMembers = []
         if (memberExists) {
             newMembers = team.members.filter(member => member != memberId)
-            const updatedTeam = await Team.findByIdAndUpdate(teamId, { members: newMembers }, { new: true })
-            res.status(200).json(updatedTeam)
-        } else {
-            newMembers = [...team.members, memberId]
             const updatedTeam = await Team.findByIdAndUpdate(teamId, { members: newMembers }, { new: true })
             res.status(200).json(updatedTeam)
         }

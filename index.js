@@ -31,6 +31,7 @@ import conferenceRoutes from "./routes/conference.route.js"
 import joinconferenceRoutes from "./routes/joinconference.route.js"
 import starCourseRoutes from "./routes/starcourse.route.js"
 import savedCardRoutes from "./routes/saved_card.route.js"
+import inviteTeamRoutes from "./routes/invite_team.route.js"
 
 dotenv.config()
 const port = 4000
@@ -133,5 +134,6 @@ app.use("/api/conference", conferenceRoutes)
 app.use("/api/join-conference", joinconferenceRoutes)
 app.use("/api/starcourse", starCourseRoutes)
 app.use("/api/saved-card", savedCardRoutes)
+app.use("/api/invite-team", inviteTeamRoutes)
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
