@@ -7,6 +7,10 @@ const teamSchema = new mongoose.Schema({
     },
     members: {
         type: Array
+    },
+    creatorId: {
+        type: String,
+        required: true
     }
 })
 
