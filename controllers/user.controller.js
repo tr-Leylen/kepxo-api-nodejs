@@ -196,14 +196,24 @@ export const getUsersPaged = async (req, res) => {
 
 export const getFriendDiscovery = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 10
         const friends = await Follow.find({ userId: req.userId })
+            .limit(limit)
+            .skip(page * limit)
         const friendsPosts = await Promise.all(
             friends.map(async friend => {
-                const friendLastPost = (await Post.find({ userId: friend.followingId }))
+                const friendLastPost = await Post.find({ userId: friend.followingId })
                 return friendLastPost.at(-1);
             })
         )
-        res.status(200).json(friendsPosts)
+        let posts = []
+        friendsPosts.map(item => {
+            if (item) {
+                posts.push(item)
+            }
+        })
+        res.status(200).json(posts)
     } catch (error) {
         return error
     }
@@ -211,16 +221,11 @@ export const getFriendDiscovery = async (req, res) => {
 
 export const getNormalDiscovery = async (req, res) => {
     try {
-        const posts = await Post.find().limit(40)
-        let randomPosts = []
-        let array = Array.from({ length: posts.length }, (_, i) => i);
-        array.sort(() => Math.random() - 0.5)
-        for (let i = 0; i < array.length; i++) {
-            if (randomPosts.length === 20) {
-                break;
-            }
-            randomPosts.push(posts[array[i]])
-        }
+        const page = req.query.page || 0
+        const limit = req.query.limit || 10
+        const posts = await Post.find().skip(page * limit).limit(limit * 3)
+        posts.sort(() => Math.random() - 0.5)
+        let randomPosts = posts.slice(0, limit)
         res.status(200).json(randomPosts)
     } catch (error) {
         console.log(error)
