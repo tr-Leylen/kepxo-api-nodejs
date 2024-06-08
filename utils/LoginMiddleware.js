@@ -9,7 +9,8 @@ export const verifyLogin = async (req, res, next) => {
             if (err) return res.status(403).json('Token is not valid')
             const user = await User.findById(data.id)
             if (!user) return res.status(404).json('User not found')
-            req.userId = data.id
+            req.userId = data.id;
+            req.userRole = user.role
             return next()
         })
     } catch (error) {

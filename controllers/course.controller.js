@@ -1,3 +1,4 @@
+import { deletePhoto } from "../deletePhoto.js"
 import BuyCourse from "../models/buycourse.model.js"
 import Category from "../models/category.model.js"
 import Course from "../models/course.model.js"
@@ -32,6 +33,7 @@ export const updateCourse = async (req, res) => {
         if (!course) return res.status(404).json("Course not found")
         if (role === 'teacher' && userId !== course.ownerId) return res.status(401).json('you can only update your own course')
         const { accepted, ...courseInfo } = req.body
+        if (course.avatar != req.body.avatar) await deletePhoto(course.avatar)
         const updateCourse = await Course.findByIdAndUpdate(req.params.id, courseInfo, { new: true })
         res.status(200).json(updateCourse)
     } catch (error) {

@@ -1,3 +1,4 @@
+import { deletePhoto } from "../deletePhoto.js";
 import BuyGift from "../models/buygift.model.js";
 import Gift from "../models/gift.model.js"
 import GiftType from "../models/gifttype.model.js";
@@ -22,7 +23,10 @@ export const updateGift = async (req, res) => {
         const gift = await Gift.findById(giftId)
         if (!gift) return res.status(404).json('Gift not found');
         const giftType = await GiftType.findById(giftTypeId)
-        if (!giftType) return res.status(404).json('Gift type not found')
+        if (!giftType) return res.status(404).json('Gift type not found');
+        if (gift.image != req.body.image) {
+            await deletePhoto(gift.image)
+        }
         const updatedGift = await Gift.findByIdAndUpdate(giftId, { ...req.body }, { new: true })
         res.status(200).json(updatedGift)
     } catch (error) {
@@ -44,7 +48,10 @@ export const viewGift = async (req, res) => {
 export const deleteGift = async (req, res) => {
     try {
         const giftId = req.params.id
+        const gift = await Gift.findById(giftId)
+        if (!gift) return res.status(404).json('Gift not found')
         await BuyGift.deleteMany({ giftId })
+        await deletePhoto(gift.image)
         await Gift.findByIdAndDelete(giftId)
         res.status(200).json('Gift deleted')
     } catch (error) {

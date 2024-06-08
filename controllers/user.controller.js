@@ -1,3 +1,4 @@
+import { deletePhoto } from "../deletePhoto.js"
 import BlockUser from "../models/blockuser.model.js"
 import BuyCourse from "../models/buycourse.model.js"
 import Follow from "../models/follow.model.js"
@@ -15,7 +16,8 @@ export const updateUser = async (req, res) => {
         }
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
-        if (req.body.role && user?.role != "admin") return res.status(403).json("You can not change your role")
+        if (req.body.role && user?.role != "admin") return res.status(403).json("You can not change your role");
+        if (user.avatar != req.body.avatar) await deletePhoto(user.avatar)
         const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true })
         res.status(200).json(updatedUser)
     } catch (error) {

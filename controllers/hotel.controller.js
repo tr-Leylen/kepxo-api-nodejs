@@ -1,4 +1,5 @@
 import Hotel from "../models/hotel.model.js"
+import { deletePhoto } from "../deletePhoto.js"
 
 export const createHotel = async (req, res) => {
     try {
@@ -14,10 +15,36 @@ export const updateHotel = async (req, res) => {
     try {
         const hotelId = req.params.id
         const hotel = await Hotel.findById(hotelId)
-        if (!hotel) throw new Error('Hotel not found')
+        if (!hotel) throw new Error('Hotel not found');
         if (req.body.star > 5) return res.status(400).json('Star value must be max 5')
         const updatedHotel = await Hotel.findByIdAndUpdate(hotelId, req.body, { new: true })
         res.status(200).json(updatedHotel)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+export const addImageHotel = async (req, res) => {
+    try {
+        const hotelId = req.params.id;
+        const hotel = await Hotel.findById(hotelId)
+        if (!hotel) return res.status(404).json('Hotel not found');
+        const updatedImages = await Hotel.findByIdAndUpdate(hotelId, { images: [...hotel.images, req.body.image] }, { new: true })
+        res.status(200).json(updatedImages.images)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+export const removeImageHotel = async (req, res) => {
+    try {
+        const hotelId = req.params.id;
+        const hotel = await Hotel.findById(hotelId)
+        if (!hotel) return res.status(404).json('Hotel not found');
+        await deletePhoto(req.body.image)
+        const newImages = hotel.images.filter(item => item != req.body.image)
+        const updatedImages = await Hotel.findByIdAndUpdate(hotelId, { images: newImages }, { new: true })
+        res.status(200).json(updatedImages.images)
     } catch (error) {
         res.status(500).json(error)
     }
@@ -28,8 +55,8 @@ export const deleteHotel = async (req, res) => {
         const hotelId = req.params.id
         const hotel = await Hotel.findById(hotelId)
         if (!hotel) throw new Error('Hotel not found')
+        hotel.images.map(async image => await deletePhoto(image))
         await Hotel.findByIdAndDelete(hotelId)
-        // konferans da silinecek
         res.status(200).json('Hotel deleted')
     } catch (error) {
         res.status(500).json(error)

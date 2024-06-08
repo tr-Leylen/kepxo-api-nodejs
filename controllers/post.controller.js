@@ -1,3 +1,4 @@
+import { deletePhoto } from "../deletePhoto.js"
 import LikePost from "../models/likepost.model.js"
 import Post from "../models/post.model.js"
 
@@ -22,7 +23,8 @@ export const updatePost = async (req, res) => {
         if (req.body.postText || req.body.imageLink) {
             const post = await Post.findById(postId)
             if (!post) return res.status(404).json('Post not found')
-            if (userId != post.userId) return res.status(403).json('You can update only your posts')
+            if (userId != post.userId) return res.status(403).json('You can update only your posts');
+            if (post.imageLink != req.body.imageLink) await deletePhoto(post.imageLink)
             const updatedPost = await Post.findByIdAndUpdate(postId, { ...req.body }, { new: true })
             res.status(200).json(updatedPost)
         } else {
@@ -39,7 +41,8 @@ export const deletePost = async (req, res) => {
         const postId = req.params.id
         const post = await Post.findById(postId)
         if (!post) return res.status(404).json('Post not found')
-        if (userId != post.userId) return res.status(403).json('You can delete only your posts')
+        if (userId != post.userId) return res.status(403).json('You can delete only your posts');
+        await deletePhoto(post.imageLink)
         await Post.findByIdAndDelete(postId)
         res.status(200).json('Post deleted')
     } catch (error) {

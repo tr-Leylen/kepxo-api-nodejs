@@ -32,8 +32,26 @@ import joinconferenceRoutes from "./routes/joinconference.route.js"
 import starCourseRoutes from "./routes/starcourse.route.js"
 import savedCardRoutes from "./routes/saved_card.route.js"
 import inviteTeamRoutes from "./routes/invite_team.route.js"
+import multer from "multer"
+import path from "path"
+import fs from 'fs'
+import { fileURLToPath } from "url"
+import Photo from "./models/photo.model.js"
+import { verifyLogin } from "./utils/LoginMiddleware.js"
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config()
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, process.env.UPLOADS_DIR)
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + "-" + file.originalname)
+    }
+})
+const upload = multer({ storage })
 const port = 4000
 const app = express()
 const server = http.createServer(app)
@@ -135,5 +153,43 @@ app.use("/api/join-conference", joinconferenceRoutes)
 app.use("/api/starcourse", starCourseRoutes)
 app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
+
+
+app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOADS_DIR)));
+app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
+    await Photo.create({
+        userId: req.userId,
+        fileName: req.file?.filename,
+        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+    })
+    res.json({
+        message: 'File uploaded successfully',
+        file: req.file,
+        // url: `http://45.9.190.138:5173/${process.env.UPLOADS_DIR + req.file?.filename}`
+        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+    })
+})
+
+// app.get("/api/photo/:fileName", async (req, res) => {
+//     const { fileName } = req.params;
+//     const photo = await Photo.findOne({ fileName })
+//     if (!photo) return res.status(404).json('Photo not found');
+//     res.status(200).json(photo.url)
+// })
+
+app.delete('/api/uploads/:fileName', verifyLogin, async (req, res) => {
+    const { fileName } = req.params;
+    const filepath = path.join(__dirname, process.env.UPLOADS_DIR, fileName);
+    const photo = await Photo.findOne({ fileName })
+    if (!photo) return res.status(404).json('Photo not found');
+    if (photo.userId != req.userId && req.userRole != 'admin') return res.status(401).json('You can only delete your own photos')
+    fs.unlink(filepath, async (err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Failed to delete file' });
+        }
+        await Photo.findByIdAndDelete(photo._id)
+        res.json({ message: 'File deleted successfully' });
+    });
+})
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
