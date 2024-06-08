@@ -157,18 +157,17 @@ app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
 
-app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOADS_DIR)));
+app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOADS_DIR || 'uploads')));
 app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
     await Photo.create({
         userId: req.userId,
         fileName: req.file?.filename,
-        url: `blob:${process.env.APP_URL}${req.file?.filename}`
+        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
     })
     res.json({
         message: 'File uploaded successfully',
         file: req.file,
-        url: `blob:${process.env.APP_URL}${req.file?.filename}`
-        // url: `blob:${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
     })
 })
 
