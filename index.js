@@ -60,7 +60,9 @@ const io = new Server(server, {
         origin: "*"
     }
 })
-app.use(cors())
+app.use(cors({
+    origin: 'http://45.9.190.138:5173'
+}))
 
 const options = {
     definition: {
@@ -165,8 +167,7 @@ app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
     res.json({
         message: 'File uploaded successfully',
         file: req.file,
-        // url: `http://45.9.190.138:5173/${process.env.UPLOADS_DIR + req.file?.filename}`
-        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+        url: `blob:${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
     })
 })
 
@@ -177,19 +178,19 @@ app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
 //     res.status(200).json(photo.url)
 // })
 
-app.delete('/api/uploads/:fileName', verifyLogin, async (req, res) => {
-    const { fileName } = req.params;
-    const filepath = path.join(__dirname, process.env.UPLOADS_DIR, fileName);
-    const photo = await Photo.findOne({ fileName })
-    if (!photo) return res.status(404).json('Photo not found');
-    if (photo.userId != req.userId && req.userRole != 'admin') return res.status(401).json('You can only delete your own photos')
-    fs.unlink(filepath, async (err) => {
-        if (err) {
-            return res.status(500).json({ message: 'Failed to delete file' });
-        }
-        await Photo.findByIdAndDelete(photo._id)
-        res.json({ message: 'File deleted successfully' });
-    });
-})
+// app.delete('/api/uploads/:fileName', verifyLogin, async (req, res) => {
+//     const { fileName } = req.params;
+//     const filepath = path.join(__dirname, process.env.UPLOADS_DIR, fileName);
+//     const photo = await Photo.findOne({ fileName })
+//     if (!photo) return res.status(404).json('Photo not found');
+//     if (photo.userId != req.userId && req.userRole != 'admin') return res.status(401).json('You can only delete your own photos')
+//     fs.unlink(filepath, async (err) => {
+//         if (err) {
+//             return res.status(500).json({ message: 'Failed to delete file' });
+//         }
+//         await Photo.findByIdAndDelete(photo._id)
+//         res.json({ message: 'File deleted successfully' });
+//     });
+// })
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
