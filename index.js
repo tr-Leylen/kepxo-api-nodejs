@@ -34,7 +34,6 @@ import savedCardRoutes from "./routes/saved_card.route.js"
 import inviteTeamRoutes from "./routes/invite_team.route.js"
 import multer from "multer"
 import path from "path"
-import fs from 'fs'
 import { fileURLToPath } from "url"
 import Photo from "./models/photo.model.js"
 import { verifyLogin } from "./utils/LoginMiddleware.js"
@@ -60,9 +59,7 @@ const io = new Server(server, {
         origin: "*"
     }
 })
-app.use(cors({
-    origin: 'http://45.9.190.138:5173'
-}))
+app.use(cors())
 
 const options = {
     definition: {
@@ -170,27 +167,5 @@ app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
         url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
     })
 })
-
-// app.get("/api/photo/:fileName", async (req, res) => {
-//     const { fileName } = req.params;
-//     const photo = await Photo.findOne({ fileName })
-//     if (!photo) return res.status(404).json('Photo not found');
-//     res.status(200).json(photo.url)
-// })
-
-// app.delete('/api/uploads/:fileName', verifyLogin, async (req, res) => {
-//     const { fileName } = req.params;
-//     const filepath = path.join(__dirname, process.env.UPLOADS_DIR, fileName);
-//     const photo = await Photo.findOne({ fileName })
-//     if (!photo) return res.status(404).json('Photo not found');
-//     if (photo.userId != req.userId && req.userRole != 'admin') return res.status(401).json('You can only delete your own photos')
-//     fs.unlink(filepath, async (err) => {
-//         if (err) {
-//             return res.status(500).json({ message: 'Failed to delete file' });
-//         }
-//         await Photo.findByIdAndDelete(photo._id)
-//         res.json({ message: 'File deleted successfully' });
-//     });
-// })
 
 server.listen(port, () => console.log(`backend running on ${port} port`))

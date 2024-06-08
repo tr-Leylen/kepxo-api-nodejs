@@ -45,29 +45,24 @@ export const register = async (req, res) => {
 export const forgotPassword = async (req, res) => {
     try {
         const transporter = nodemailer.createTransport({
-            service: 'Gmail',
-            secure: true,
-            port: 465,
-            host: 'smtp.gmail.com',
+            service: 'gmail',
             auth: {
                 user: 'elturanfcb@gmail.com',
-                pass: APP_PASS
+                pass: 'zxhf mfkw uvnl iuwe'
             }
         })
         const user = await User.findOne({ email: req.body.email })
         if (!user) return res.status(404).json('User not found');
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        const resetLink = `http://45.9.190.138:5173/forgot-password?token=${token}`
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '10m' });
 
         const mailOptions = {
             from: 'elturanfcb@gmail.com',
             to: user.email,
             subject: 'Password Reset',
-            text: `Click the following link to reset your password: ${resetLink}`
+            text: `Your token: ${token}`,
         }
 
         await transporter.sendMail(mailOptions)
-        console.log(token)
         res.status(200).json('Mail send')
     } catch (error) {
         console.log(error)
