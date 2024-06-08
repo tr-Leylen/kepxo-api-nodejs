@@ -52,12 +52,18 @@ export const getUser = async (req, res) => {
 
 export const getFollowers = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 20
         const userId = req.params.id
-        const followers = await Follow.find({ followingId: userId })
+        const followers = await Follow.find({ followingId: userId }).skip(page * limit).limit(limit);
+        const totalPages = await Follow.countDocuments({ followingId: userId })
         const followerIds = followers.map(item => {
             return item.userId
         })
-        res.status(200).json(followerIds)
+        res.status(200).json({
+            data: followerIds,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -65,12 +71,18 @@ export const getFollowers = async (req, res) => {
 
 export const getFollowings = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 20
         const userId = req.params.id
-        const followings = await Follow.find({ userId })
+        const followings = await Follow.find({ userId }).skip(page * limit).limit(limit);
+        const totalPages = await Follow.countDocuments({ userId })
         const followingIds = followings.map(item => {
             return item.followingId
         })
-        res.status(200).json(followingIds)
+        res.status(200).json({
+            data: followingIds,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -78,14 +90,20 @@ export const getFollowings = async (req, res) => {
 
 export const likedCourses = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 10
         const userId = req.userId
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
-        const courses = await LikeCourse.find({ userId })
+        const courses = await LikeCourse.find({ userId }).skip(page * limit).limit(limit)
+        const totalPages = await LikeCourse.countDocuments({ userId })
         const courseIds = courses.map(item => {
             return item._id
         })
-        res.status(200).json(courseIds)
+        res.status(200).json({
+            data: courseIds,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -93,11 +111,17 @@ export const likedCourses = async (req, res) => {
 
 export const buyedCourses = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 10
         const userId = req.userId
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
-        const buyedList = await BuyCourse.find({ userId })
-        res.status(200).json(buyedList)
+        const buyedList = await BuyCourse.find({ userId }).skip(page * limit).limit(limit)
+        const totalPages = await BuyCourse.countDocuments({ userId })
+        res.status(200).json({
+            data: buyedList,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -118,11 +142,17 @@ export const blockedUsers = async (req, res) => {
 
 export const scoreHistory = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 20
         const userId = req.userId
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
-        const scores = await ScoreHistory.find({ userId })
-        res.status(500).json(scores)
+        const scores = await ScoreHistory.find({ userId }).skip(page * limit).limit(limit)
+        const totalPages = await ScoreHistory.countDocuments({ userId })
+        res.status(500).json({
+            data: scores,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -130,9 +160,15 @@ export const scoreHistory = async (req, res) => {
 
 export const userPosts = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 20
         const userId = req.params.id
-        const posts = await Post.find({ userId })
-        res.status(200).json(posts)
+        const posts = await Post.find({ userId }).skip(page * limit).limit(limit)
+        const totalPages = await Post.countDocuments({ userId })
+        res.status(200).json({
+            data: posts,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -140,9 +176,17 @@ export const userPosts = async (req, res) => {
 
 export const userNotifications = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 20
         const notificationTo = req.userId
         const notifications = await Notification.find({ notificationTo })
-        res.status(200).json(notifications)
+            .skip(page * limit)
+            .limit(limit)
+        const totalPages = await Notification.countDocuments()
+        res.status(200).json({
+            data: notifications,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -160,8 +204,8 @@ export const getTeachers = async (req, res) => {
 
 export const getTeachersPaged = async (req, res) => {
     try {
-        const limit = 9
-        const { page } = req.query
+        const limit = req.query.limit || 9
+        const page = req.query.page || 0
         const teachers = await User.find({ role: 'teacher' })
             .skip(page * limit)
             .limit(limit)
@@ -225,10 +269,15 @@ export const getNormalDiscovery = async (req, res) => {
     try {
         const page = req.query.page || 0
         const limit = req.query.limit || 10
+        if (limit < 1) return res.status(200).json([])
         const posts = await Post.find().skip(page * limit).limit(limit * 3)
+        const totalPages = await Post.countDocuments()
         posts.sort(() => Math.random() - 0.5)
         let randomPosts = posts.slice(0, limit)
-        res.status(200).json(randomPosts)
+        res.status(200).json({
+            data: randomPosts,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         console.log(error)
         res.status(500).json(error)

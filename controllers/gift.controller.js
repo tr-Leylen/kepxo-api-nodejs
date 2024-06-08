@@ -61,8 +61,14 @@ export const deleteGift = async (req, res) => {
 
 export const getAllGifts = async (req, res) => {
     try {
-        const data = await Gift.find()
-        res.status(200).json(data)
+        const page = req.query.page || 0
+        const limit = req.query.limit || 50
+        const data = await Gift.find().skip(page * limit).limit(limit);
+        const totalPages = await Gift.countDocuments()
+        res.status(200).json({
+            data,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json(error)
     }

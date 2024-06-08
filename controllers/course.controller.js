@@ -74,9 +74,15 @@ export const getCourse = async (req, res) => {
 
 export const getTeacherCourses = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 20
         const userId = req.params.id
-        const courses = await Course.find({ ownerId: userId, accepted: true })
-        res.status(200).json(courses)
+        const courses = await Course.find({ ownerId: userId, accepted: true }).skip(page * limit).limit(limit)
+        const totalPages = await Course.countDocuments({ownerId:userId, accepted:true})
+        res.status(200).json({
+            data:courses,
+            totalPages: Math.ceil(totalPages/limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -84,7 +90,8 @@ export const getTeacherCourses = async (req, res) => {
 
 export const getRecommendedCourses = async (req, res) => {
     try {
-        const courses = await Course.find({ accepted: true }).limit(3)
+        const courses = await Course.find({ accepted: true, star: 5 }).limit(10)
+        courses.sort(() => Math.random() - 0.5)
         res.status(200).json(courses)
     } catch (error) {
         res.status(500).json('Internal Server Error')

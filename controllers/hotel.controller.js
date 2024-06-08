@@ -79,9 +79,15 @@ export const getHotel = async (req, res) => {
 
 export const getCityHotel = async (req, res) => {
     try {
+        const page = req.query.page || 0
+        const limit = req.query.limit || 10
         const city = req.params.city
-        const hotels = await Hotel.find({ city: { $regex: city, $options: 'i' } })
-        res.status(200).json(hotels)
+        const hotels = await Hotel.find({ city: { $regex: city, $options: 'i' } }).skip(page * limit).limit(limit)
+        const totalPages = await Hotel.countDocuments({ city: { $regex: city, $options: 'i' } })
+        res.status(200).json({
+            data: hotels,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json(error)
     }
@@ -89,13 +95,17 @@ export const getCityHotel = async (req, res) => {
 
 export const getPopularHotels = async (req, res) => {
     try {
-        const limit = 10
-        const { page } = req.query
+        const page = req.query.page || 0
+        const limit = req.query.limit || 10
         const hotels = await Hotel.find()
             .skip(page * limit)
             .limit(limit)
             .sort({ 'star': -1 })
-        res.status(200).json(hotels)
+        const totalPages = await Hotel.countDocuments()
+        res.status(200).json({
+            data: hotels,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json(error)
     }
@@ -103,12 +113,16 @@ export const getPopularHotels = async (req, res) => {
 
 export const getHotels = async (req, res) => {
     try {
-        const limit = 10
-        const { page } = req.query
+        const page = req.query.page || 0
+        const limit = req.query.limit || 10
         const hotels = await Hotel.find()
             .skip(page * limit)
             .limit(limit)
-        res.status(200).json(hotels)
+        const totalPages = await Hotel.countDocuments()
+        res.status(200).json({
+            data: hotels,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json(error)
     }
