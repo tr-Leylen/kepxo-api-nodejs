@@ -78,10 +78,10 @@ export const getTeacherCourses = async (req, res) => {
         const limit = req.query.limit || 20
         const userId = req.params.id
         const courses = await Course.find({ ownerId: userId, accepted: true }).skip(page * limit).limit(limit)
-        const totalPages = await Course.countDocuments({ownerId:userId, accepted:true})
+        const totalPages = await Course.countDocuments({ ownerId: userId, accepted: true })
         res.status(200).json({
-            data:courses,
-            totalPages: Math.ceil(totalPages/limit)
+            data: courses,
+            totalPages: Math.ceil(totalPages / limit)
         })
     } catch (error) {
         res.status(500).json('Internal Server Error')
@@ -146,8 +146,14 @@ export const acceptCourse = async (req, res) => {
 
 export const getNoAcceptedCourses = async (req, res) => {
     try {
-        const courses = await Course.find({ accepted: false })
-        res.status(200).json(courses)
+        const limit = req.query.limit || 10
+        const page = req.query.page || 0
+        const courses = await Course.find({ accepted: false }).skip(page * limit).limit(limit)
+        const totalPages = await Course.countDocuments({ accepted: false })
+        res.status(200).json({
+            data: courses,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -155,8 +161,14 @@ export const getNoAcceptedCourses = async (req, res) => {
 
 export const getAllCoursesAdmin = async (req, res) => {
     try {
-        const courses = await Course.find({ accepted: true })
-        res.status(200).json(courses)
+        const page = req.query.page || 0
+        const limit = req.query.limit || 20
+        const courses = await Course.find({ accepted: true }).skip(page * limit).limit(limit)
+        const totalPages = await Course.countDocuments({ accepted: true })
+        res.status(200).json({
+            data: courses,
+            totalPages: Math.ceil(totalPages / limit)
+        })
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }

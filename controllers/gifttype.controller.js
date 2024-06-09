@@ -1,3 +1,4 @@
+import { deletePhoto } from "../deletePhoto.js"
 import Gift from "../models/gift.model.js"
 import GiftType from "../models/gifttype.model.js"
 
@@ -36,6 +37,12 @@ export const deleteGiftType = async (req, res) => {
         const id = req.params.id
         const giftType = await GiftType.findById(id)
         if (!giftType) return res.status(404).json('Gift type not found');
+        const gifts = await Gift.find({ giftType: giftType._id })
+        await Promise.all(
+            gifts.map(async item => {
+                await deletePhoto(item.image)
+            })
+        )
         await Gift.deleteMany({ giftType: id })
         await GiftType.findByIdAndDelete(id)
         res.status(200).json('Gift type deleted')
