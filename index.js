@@ -104,7 +104,7 @@ const connection = mongoose.connection;
 
 io.on('connection', (socket) => {
 
-    socket.on('connect', () => { console.log('User connected') })
+    // socket.on('connect', () => { console.log('User connected') })
 
     const token = socket.handshake.headers.authorization?.split(" ")[1];
     let userId;
@@ -114,15 +114,15 @@ io.on('connection', (socket) => {
         const user = await User.findById(userId)
         if (!user) console.log("user not found")
     })
-    const notificationChangeStream = Notification.watch()
-    notificationChangeStream.on('change', (change) => {
-        if (change.operationType === 'insert') {
-            const notification = change.fullDocument
-            if (notification.notificationTo === userId) {
-                io.emit('notification', notification)
-            }
-        }
-    })
+    // const notificationChangeStream = Notification.watch()
+    // notificationChangeStream.on('change', (change) => {
+    //     if (change.operationType === 'insert') {
+    //         const notification = change.fullDocument
+    //         if (notification.notificationTo === userId) {
+    //             io.emit('notification', notification)
+    //         }
+    //     }
+    // })
 
     socket.on('disconnect', () => {
         console.log('User disconnected')

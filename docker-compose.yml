@@ -1,3 +1,15 @@
+# version: '3.1'
+
+# services:
+#   app:
+#     build: 
+#       context: .
+#     image: kepxo-back
+#     container_name: kepxo-back
+#     restart: always
+#     ports:
+#       - "4000:4000"
+
 version: '3.1'
 
 services:
@@ -9,3 +21,14 @@ services:
     restart: always
     ports:
       - "4000:4000"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: kepxo-mongo
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/db:/data/db
