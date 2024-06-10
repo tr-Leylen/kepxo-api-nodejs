@@ -87,37 +87,36 @@ app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 
-async function initiateReplicaSet() {
-    const client = new MongoClient(process.env.MONGO, { useUnifiedTopology: true });
-    try {
-        await client.connect();
-        const adminDb = client.db().admin();
-        const replSetStatus = await adminDb.command({ replSetGetStatus: 1 });
+// async function initiateReplicaSet() {
+//     const client = new MongoClient(process.env.MONGO, { useUnifiedTopology: true });
+//     try {
+//         await client.connect();
+//         const adminDb = client.db().admin();
+//         const replSetStatus = await adminDb.command({ replSetGetStatus: 1 });
 
-        // Replika set zaten başlatılmışsa hiçbir şey yapmayın
-        if (replSetStatus.ok) {
-            console.log('Replika set zaten başlatılmış.');
-            return;
-        }
-    } catch (error) {
-        if (error.codeName === 'NotYetInitialized') {
-            console.log('Replika set başlatılıyor...');
-            await client.db().admin().command({ replSetInitiate: {} });
-            console.log('Replika set başlatıldı.');
-        } else {
-            console.error('Replika set başlatılırken hata oluştu:', error);
-        }
-    } finally {
-        await client.close();
-    }
-}
+//         // Replika set zaten başlatılmışsa hiçbir şey yapmayın
+//         if (replSetStatus.ok) {
+//             console.log('Replika set zaten başlatılmış.');
+//             return;
+//         }
+//     } catch (error) {
+//         if (error.codeName === 'NotYetInitialized') {
+//             console.log('Replika set başlatılıyor...');
+//             await client.db().admin().command({ replSetInitiate: {} });
+//             console.log('Replika set başlatıldı.');
+//         } else {
+//             console.error('Replika set başlatılırken hata oluştu:', error);
+//         }
+//     } finally {
+//         await client.close();
+//     }
+// }
 
-
-
-
-mongoose.connect(process.env.MONGO)
-    .then(async () => console.log('DB Connected'))
-    .catch((err) => console.log("DB conntection Error!"))
+await mongoose.connect(process.env.MONGO, {
+    authSource: "admin",
+    user: process.env.MONGO_USER,
+    pass: process.env.MONGO_PASS,
+}).then(() => console.log('DB Connected')).catch(err => console.log(err));
 
 const connection = mongoose.connection;
 
@@ -132,32 +131,32 @@ const connection = mongoose.connection;
 //     })
 // })
 
-io.on('connection', (socket) => {
+// io.on('connection', (socket) => {
 
-    // socket.on('connect', () => { console.log('User connected') })
+//     socket.on('connect', () => { console.log('User connected') })
 
-    const token = socket.handshake.headers.authorization?.split(" ")[1];
-    let userId;
-    jwt.verify(token, process.env.JWT_SECRET, async (err, data) => {
-        if (err) return console.log('Token is not valid')
-        userId = data.id
-        const user = await User.findById(userId)
-        if (!user) console.log("user not found")
-    })
-    // const notificationChangeStream = Notification.watch()
-    // notificationChangeStream.on('change', (change) => {
-    //     if (change.operationType === 'insert') {
-    //         const notification = change.fullDocument
-    //         if (notification.notificationTo === userId) {
-    //             io.emit('notification', notification)
-    //         }
-    //     }
-    // })
+//     const token = socket.handshake.headers.authorization?.split(" ")[1];
+//     let userId;
+//     jwt.verify(token, process.env.JWT_SECRET, async (err, data) => {
+//         if (err) return console.log('Token is not valid')
+//         userId = data.id
+//         const user = await User.findById(userId)
+//         if (!user) console.log("user not found")
+//     })
+//     const notificationChangeStream = Notification.watch()
+//     notificationChangeStream.on('change', (change) => {
+//         if (change.operationType === 'insert') {
+//             const notification = change.fullDocument
+//             if (notification.notificationTo === userId) {
+//                 io.emit('notification', notification)
+//             }
+//         }
+//     })
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected')
-    })
-})
+//     socket.on('disconnect', () => {
+//         console.log('User disconnected')
+//     })
+// })
 
 app.use("/api/auth", authRoutes)
 app.use("/api/course", courseRoutes)
