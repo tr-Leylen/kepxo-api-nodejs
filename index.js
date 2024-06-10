@@ -37,6 +37,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import Photo from "./models/photo.model.js"
 import { verifyLogin } from "./utils/LoginMiddleware.js"
+import { MongoClient } from "mongodb"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,8 +86,37 @@ const swaggerSpec = swaggerJSDoc(options)
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
+
+async function initiateReplicaSet() {
+    const client = new MongoClient(process.env.MONGO, { useUnifiedTopology: true });
+    try {
+        await client.connect();
+        const adminDb = client.db().admin();
+        const replSetStatus = await adminDb.command({ replSetGetStatus: 1 });
+
+        // Replika set zaten başlatılmışsa hiçbir şey yapmayın
+        if (replSetStatus.ok) {
+            console.log('Replika set zaten başlatılmış.');
+            return;
+        }
+    } catch (error) {
+        if (error.codeName === 'NotYetInitialized') {
+            console.log('Replika set başlatılıyor...');
+            await client.db().admin().command({ replSetInitiate: {} });
+            console.log('Replika set başlatıldı.');
+        } else {
+            console.error('Replika set başlatılırken hata oluştu:', error);
+        }
+    } finally {
+        await client.close();
+    }
+}
+
+
+
+
 mongoose.connect(process.env.MONGO)
-    .then(() => console.log("Connected to DB"))
+    .then(async () => console.log('DB Connected'))
     .catch((err) => console.log("DB conntection Error!"))
 
 const connection = mongoose.connection;
