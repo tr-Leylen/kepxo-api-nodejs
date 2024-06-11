@@ -1,3 +1,4 @@
+import { userSockets } from "../index.js"
 import LikePost from "../models/likepost.model.js"
 import Notification from "../models/notification.model.js"
 import Post from "../models/post.model.js"
@@ -11,7 +12,15 @@ export const likePost = async (req, res) => {
         const userLikedCurrentPost = await LikePost.find({ userId, postId })
         if (userLikedCurrentPost.length === 0) {
             await LikePost.create({ userId, postId })
-            await Notification.create({ notificationTo: post.userId, notificationFrom: userId, actionType: 'like' })
+            const notification = await Notification.create({
+                notificationTo: post.userId,
+                notificationFrom: userId,
+                actionType: 'like'
+            })
+            const socketId = userSockets[notification.notificationTo]
+            if (socketId) {
+                req.io.to(socketId).emit('notification', notification)
+            }
             res.status(200).json('Post liked')
         } else {
             const like = await LikePost.find({ userId, postId })

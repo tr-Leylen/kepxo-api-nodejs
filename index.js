@@ -136,7 +136,7 @@ io.on('connection', (socket) => {
     let user_id;
     socket.on('register', (userId) => {
         user_id = userId
-        userSockets[userId] = socket.id
+        userSockets[userId] = socket.id;
     })
 
     socket.on('disconnect', () => {
@@ -156,7 +156,7 @@ app.use("/api/blockuser", blockUserRoutes)
 app.use("/api/commentuser", commentUserRoutes)
 app.use("/api/post", postRoutes)
 app.use("/api/notification", notificationRoutes)
-app.use("/api/likepost", likePostRoutes)
+app.use("/api/likepost", socketMiddleware(io), likePostRoutes)
 app.use("/api/likeuser", likeUserRoutes)
 app.use("/api/buygift", buyGiftRoutes)
 app.use("/api/gift", giftRoutes)
