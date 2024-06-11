@@ -27,6 +27,7 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
     try {
         const { username, email, password, ...userInfo } = req.body
+        if (req.body.role === 'admin') return res.status(403).json('You dont set admin himself')
         const validUser = await User.findOne({ username })
         if (validUser) return res.status(409).json("User exists")
         const validEmail = await User.findOne({ email })
