@@ -19,7 +19,8 @@ export const updateUser = async (req, res) => {
         if (req.body.role && user?.role != "admin") return res.status(403).json("You can not change your role");
         if (user.avatar != req.body.avatar) await deletePhoto(user.avatar)
         const updatedUser = await User.findByIdAndUpdate(userId, req.body, { new: true })
-        res.status(200).json(updatedUser)
+        const { password, ...userInfo } = updatedUser._doc;
+        res.status(200).json(userInfo);
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
