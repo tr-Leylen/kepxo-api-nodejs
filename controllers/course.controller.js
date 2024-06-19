@@ -117,6 +117,29 @@ export const searchCourse = async (req, res) => {
     }
 }
 
+export const searchCourseTitle = async (req, res) => {
+    try {
+        const { title, page, limit } = req.query;
+        const courses = Course.find({
+            title: { $regex: title, $options: 'i' },
+            accepted: true
+        })
+            .limit(limit)
+            .skip(page * limit)
+        const courseCount = Course.countDocuments({
+            title: { $regex: title, $options: 'i' },
+            accepted: true
+        })
+        const data = await Promise.all([courses, courseCount])
+        res.status(200).json({
+            data: data[0],
+            totalPages: Math.ceil(data[1] / limit)
+        })
+    } catch (error) {
+        return error
+    }
+}
+
 export const courseLikedUsers = async (req, res) => {
     try {
         const courseId = req.params.id

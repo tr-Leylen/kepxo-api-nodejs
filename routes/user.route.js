@@ -1,5 +1,5 @@
 import express from 'express'
-import { blockedUsers, deleteUser, getFollowers, getFollowings, getFriendDiscovery, getNormalDiscovery, getTeachers, getTeachersPaged, getUser, getUsersPaged, likedCourses, scoreHistory, updateUser, userNotifications, userPosts } from '../controllers/user.controller.js';
+import { blockedUsers, deleteUser, getFollowers, getFollowings, getFriendDiscovery, getNormalDiscovery, getTeachers, getTeachersPaged, getUser, getUsersPaged, likedCourses, scoreHistory, searchTeacher, searchUser, updateUser, userNotifications, userPosts } from '../controllers/user.controller.js';
 import { verifyUser } from '../utils/UserMiddleware.js';
 import { verifyLogin } from '../utils/LoginMiddleware.js';
 import { verifyAdmin } from '../utils/AdminMiddleware.js';
@@ -21,5 +21,7 @@ router.get("/teachers-paged?:page", getTeachersPaged)
 router.get("/users?:page", verifyAdmin, getUsersPaged)
 router.get("/friend-discovery", verifyUser, getFriendDiscovery)
 router.get("/normal-discovery", verifyUser, getNormalDiscovery)
+router.get("/search-user", searchUser)
+router.get("/search-teacher", searchTeacher)
 
 export default router;

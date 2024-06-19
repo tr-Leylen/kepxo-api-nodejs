@@ -284,3 +284,59 @@ export const getNormalDiscovery = async (req, res) => {
         res.status(500).json(error)
     }
 }
+
+export const searchUser = async (req, res) => {
+    try {
+        const { username, page, limit } = req.query
+        const users = await User.find({
+            username: { $regex: username, $options: 'i' },
+            role: 'user'
+        })
+            .limit(limit)
+            .skip(page * limit)
+        const userInfos = users.map(user => {
+            const { _id } = user._doc
+            return _id
+        })
+        const usersCount = await User.countDocuments({
+            username: { $regex: username, $options: 'i' },
+            role: 'user'
+        })
+        const data = {
+            data: userInfos,
+            totalPages: Math.ceil(usersCount / limit)
+        }
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+    }
+}
+
+export const searchTeacher = async (req, res) => {
+    try {
+        const { username, page, limit } = req.query
+        const users = await User.find({
+            username: { $regex: username, $options: 'i' },
+            role: 'teacher'
+        })
+            .limit(limit)
+            .skip(page * limit)
+        const userInfos = users.map(user => {
+            const { _id } = user._doc
+            return _id
+        })
+        const usersCount = await User.countDocuments({
+            username: { $regex: username, $options: 'i' },
+            role: 'teacher'
+        })
+        const data = {
+            data: userInfos,
+            totalPages: Math.ceil(usersCount / limit)
+        }
+        res.status(200).json(data)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error)
+    }
+}
