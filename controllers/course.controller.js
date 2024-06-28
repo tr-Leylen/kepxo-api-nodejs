@@ -62,10 +62,6 @@ export const getCourse = async (req, res) => {
     try {
         const course = await Course.findById(req.params.id)
         if (!course) return res.status(404).json('Course not found');
-        const courseStars = await StarCourse.find({ courseId: req.params.id });
-        const starPoints = courseStars.reduce((acc, item) => acc += item.star, 0)
-        const starAvg = (starPoints / courseStars.length).toFixed(1)
-        course.star = starAvg
         res.status(200).json(course)
     } catch (error) {
         res.status(500).json('Internal Server Error')
