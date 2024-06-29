@@ -5,7 +5,7 @@ const calcStar = async (courseId) => {
     const courseStars = await StarCourse.find({ courseId })
     const starPoints = courseStars.reduce((acc, item) => acc += item.star, 0)
     const starAvg = (starPoints / courseStars.length).toFixed(1)
-    return starAvg;
+    return Number(starAvg);
 }
 
 export const setStar = async (req, res) => {
@@ -17,7 +17,7 @@ export const setStar = async (req, res) => {
         const starExists = await StarCourse.find({ userId: req.userId, courseId });
         if (starExists.length > 0) return res.status(400).json('Course stared by this user')
         const scoredCourse = await StarCourse.create({ courseId, star, userId: req.userId });
-        const starAvg = await calcStar()
+        const starAvg = await calcStar(courseId)
         await Course.findByIdAndUpdate(courseId, { star: starAvg })
         res.status(201).json(scoredCourse)
     } catch (error) {

@@ -11,7 +11,8 @@ const starCourseSchema = new mongoose.Schema({
     },
     star: {
         type: Number,
-        required: true
+        default: 0,
+        required: true,
     }
 })
 
