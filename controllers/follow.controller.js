@@ -11,12 +11,15 @@ export const followUser = async (req, res) => {
             await Follow.findByIdAndDelete(followExists[0]._id)
             return res.status(200).json('User unfollowed')
         } else {
-            await Follow.create({ userId, followingId })
-            const notification = await Notification.create({
-                notificationTo: followingId,
-                notificationFrom: userId,
-                actionType: 'follow'
-            })
+            const data = await Promise.all([
+                Follow.create({ userId, followingId }),
+                Notification.create({
+                    notificationTo: followingId,
+                    notificationFrom: userId,
+                    actionType: 'follow'
+                })
+            ])
+            const notification = data[1]
             const socketId = userSockets[followingId]
             if (socketId) {
                 req.io.to(socketId).emit('notification', notification)

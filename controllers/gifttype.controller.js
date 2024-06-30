@@ -43,8 +43,10 @@ export const deleteGiftType = async (req, res) => {
                 await deletePhoto(item.image)
             })
         )
-        await Gift.deleteMany({ giftType: id })
-        await GiftType.findByIdAndDelete(id)
+        await Promise.all([
+            Gift.deleteMany({ giftType: id }),
+            GiftType.findByIdAndDelete(id)
+        ])
         res.status(200).json('Gift type deleted')
     } catch (error) {
         res.status(500).json(error)

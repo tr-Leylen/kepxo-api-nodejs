@@ -5,11 +5,7 @@ const scoreHistorySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    courseTitle: {
-        type: String,
-        required: true
-    },
-    courseScore: {
+    courseId: {
         type: String,
         required: true
     }

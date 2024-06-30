@@ -1,6 +1,7 @@
 import { deletePhoto } from "../deletePhoto.js"
 import LikePost from "../models/likepost.model.js"
 import Post from "../models/post.model.js"
+import User from "../models/user.model.js"
 
 export const addPost = async (req, res) => {
     try {
@@ -42,8 +43,10 @@ export const deletePost = async (req, res) => {
         const post = await Post.findById(postId)
         if (!post) return res.status(404).json('Post not found')
         if (userId != post.userId) return res.status(403).json('You can delete only your posts');
-        await deletePhoto(post.imageLink)
-        await Post.findByIdAndDelete(postId)
+        await Promise.all([
+            deletePhoto(post.imageLink),
+            Post.findByIdAndDelete(postId)
+        ])
         res.status(200).json('Post deleted')
     } catch (error) {
         res.status(500).json('Internal Server Error')
@@ -67,10 +70,10 @@ export const likedUsers = async (req, res) => {
         const post = await Post.findById(postId)
         if (!post) return res.status(404).json(post)
         const likedList = await LikePost.find({ postId })
-        const likedUserIds = likedList.map(item => {
-            return item.userId
-        })
-        res.status(200).json(likedUserIds)
+        const users = await Promise.all(
+            likedList.map(item => User.findById(item.userId))
+        )
+        res.status(200).json(users)
     } catch (error) {
         res.status(500).json("Internal Server Error")
     }

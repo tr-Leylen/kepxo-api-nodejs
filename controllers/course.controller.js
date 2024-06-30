@@ -3,7 +3,7 @@ import BuyCourse from "../models/buycourse.model.js"
 import Category from "../models/category.model.js"
 import Course from "../models/course.model.js"
 import LikeCourse from "../models/likecourse.model.js"
-import StarCourse from "../models/starcourse.model.js"
+import User from "../models/user.model.js"
 
 export const createCourse = async (req, res) => {
     try {
@@ -73,8 +73,10 @@ export const getTeacherCourses = async (req, res) => {
         const page = req.query.page || 0
         const limit = req.query.limit || 20
         const userId = req.params.id
-        const courses = await Course.find({ ownerId: userId, accepted: true }).skip(page * limit).limit(limit)
-        const totalPages = await Course.countDocuments({ ownerId: userId, accepted: true })
+        const [courses, totalPages] = await Promise.all([
+            Course.find({ ownerId: userId, accepted: true }).skip(page * limit).limit(limit),
+            Course.countDocuments({ ownerId: userId, accepted: true })
+        ])
         res.status(200).json({
             data: courses,
             totalPages: Math.ceil(totalPages / limit)
@@ -140,10 +142,21 @@ export const courseLikedUsers = async (req, res) => {
     try {
         const courseId = req.params.id
         const likeArray = await LikeCourse.find({ courseId })
-        const likedUserIds = likeArray.map(item => {
-            return item._id
+        const likedUserIds = likeArray.map(item => item.userId)
+        const users = await Promise.all(
+            likedUserIds.map(id => User.findById(id))
+        )
+        const usersShortData = users.map(user => {
+            let data = {
+                _id: user._id,
+                username: user.username,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                avatar: user.avatar
+            }
+            return data;
         })
-        return res.status(200).json(likedUserIds)
+        return res.status(200).json(usersShortData)
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }

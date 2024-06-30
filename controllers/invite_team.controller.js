@@ -14,7 +14,7 @@ export const sendInvite = async (req, res) => {
             senderId: actionUser,
             invitedUser: req.params.id
         })
-        if (inviteExists) return res.status(400).json('User already invited')
+        if (inviteExists.length) return res.status(400).json('User already invited')
         const invite = await InviteTeam.create({
             invitedUser: req.params.id,
             teamId: team._id,

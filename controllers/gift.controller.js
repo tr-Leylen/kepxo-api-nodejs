@@ -50,9 +50,11 @@ export const deleteGift = async (req, res) => {
         const giftId = req.params.id
         const gift = await Gift.findById(giftId)
         if (!gift) return res.status(404).json('Gift not found')
-        await BuyGift.deleteMany({ giftId })
-        await deletePhoto(gift.image)
-        await Gift.findByIdAndDelete(giftId)
+        await Promise.all([
+            BuyGift.deleteMany({ giftId }),
+            deletePhoto(gift.image),
+            Gift.findByIdAndDelete(giftId)
+        ])
         res.status(200).json('Gift deleted')
     } catch (error) {
         res.status(500).json('Internal Server Error')
@@ -63,8 +65,10 @@ export const getAllGifts = async (req, res) => {
     try {
         const page = req.query.page || 0
         const limit = req.query.limit || 50
-        const data = await Gift.find().skip(page * limit).limit(limit);
-        const totalPages = await Gift.countDocuments()
+        const [data, totalPages] = await Promise.all([
+            Gift.find().skip(page * limit).limit(limit),
+            Gift.countDocuments()
+        ])
         res.status(200).json({
             data,
             totalPages: Math.ceil(totalPages / limit)

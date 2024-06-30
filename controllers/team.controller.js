@@ -1,4 +1,5 @@
 import Team from "../models/team.model.js"
+import User from "../models/user.model.js"
 
 export const createTeam = async (req, res) => {
     try {
@@ -16,7 +17,15 @@ export const createTeam = async (req, res) => {
 export const getTeam = async (req, res) => {
     try {
         const team = await Team.findById(req.params.id)
-        if (!team) return res.status(404).json('Team not found')
+        if (!team) return res.status(404).json('Team not found');
+        const users = await Promise.all(
+            team.members.map(member => User.findById(member))
+        )
+        const usersDatas = users.map(user => {
+            const { email, bio, password, score, role, enable, city, phone, ...userData } = user._doc
+            return userData;
+        })
+        team.members = usersDatas
         res.status(200).json(team)
     } catch (error) {
         res.status(500).json('Internal Server Error')
@@ -35,12 +44,26 @@ export const deleteMember = async (req, res) => {
         const memberExists = team.members.includes(memberId)
         if (!memberExists) return res.status(404).json('User is not team`s member');
         let newMembers = []
-        if (memberExists) {
-            newMembers = team.members.filter(member => member != memberId)
-            const updatedTeam = await Team.findByIdAndUpdate(teamId, { members: newMembers }, { new: true })
-            res.status(200).json(updatedTeam)
-        }
+        newMembers = team.members.filter(member => member != memberId)
+        const updatedTeam = await Team.findByIdAndUpdate(teamId, { members: newMembers }, { new: true })
+        const usersDatas = await Promise.all(
+            updatedTeam.members.map(userId => User.findById(userId))
+        )
+        const teamUserList = usersDatas.map(user => {
+            let data = {
+                _id: user._id,
+                username: user.username,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                avatar: user?.avatar
+            }
+            return data;
+        })
+        updatedTeam.members = teamUserList
+        res.status(200).json(updatedTeam)
+
     } catch (error) {
+        console.log(error)
         res.status(500).json('Internal Server Error')
     }
 }
@@ -53,7 +76,8 @@ export const changeTeamName = async (req, res) => {
         const team = await Team.findById(teamId)
         if (!team) return res.status(404).json("Team not found")
         if (team.creatorId != creatorId) return res.status(403).json("You are not this team's creator")
-        const updatedTeam = await Team.findByIdAndUpdate(teamId, { title: newTitle }, { new: true })
+        const updatedTeam = await Team.findByIdAndUpdate(teamId, { title: newTitle }, { new: true });
+
         res.status(200).json(updatedTeam)
     } catch (error) {
         res.status(500).json('Internal Server Error')

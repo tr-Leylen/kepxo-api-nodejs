@@ -31,8 +31,12 @@ export const deleteCategory = async (req, res) => {
         const categoryId = req.params.id
         const category = await Category.findById(categoryId)
         if (!category) return res.status(404).json('Category not found')
+        const courses = await Course.find({ categoryId })
         await Category.findByIdAndDelete(categoryId)
-        await Course.deleteMany({ categoryId })
+        await Promise.all(
+            courses.map(course => Course.findByIdAndUpdate(course._id, { enable: false, accepted: false }))
+        )
+        // await Course.deleteMany({ categoryId })
         res.status(200).json('Category deleted')
     } catch (error) {
         res.status(500).json('Internal Server Error')

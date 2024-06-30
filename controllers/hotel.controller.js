@@ -97,11 +97,15 @@ export const getPopularHotels = async (req, res) => {
     try {
         const page = req.query.page || 0
         const limit = req.query.limit || 10
-        const hotels = await Hotel.find()
-            .skip(page * limit)
-            .limit(limit)
-            .sort({ 'star': -1 })
-        const totalPages = await Hotel.countDocuments()
+        const data = await Promise.all([
+            Hotel.find()
+                .skip(page * limit)
+                .limit(limit)
+                .sort({ 'star': -1 }),
+            Hotel.countDocuments()
+        ])
+        const hotels = data[0]
+        const totalPages = data[1]
         res.status(200).json({
             data: hotels,
             totalPages: Math.ceil(totalPages / limit)
@@ -115,10 +119,14 @@ export const getHotels = async (req, res) => {
     try {
         const page = req.query.page || 0
         const limit = req.query.limit || 10
-        const hotels = await Hotel.find()
-            .skip(page * limit)
-            .limit(limit)
-        const totalPages = await Hotel.countDocuments()
+        const data = await Promise.all([
+            Hotel.find()
+                .skip(page * limit)
+                .limit(limit),
+            Hotel.countDocuments()
+        ])
+        const hotels = data[0]
+        const totalPages = data[1]
         res.status(200).json({
             data: hotels,
             totalPages: Math.ceil(totalPages / limit)

@@ -1,12 +1,27 @@
 import { deletePhoto } from "../deletePhoto.js"
 import BlockUser from "../models/blockuser.model.js"
 import BuyCourse from "../models/buycourse.model.js"
+import Course from "../models/course.model.js"
 import Follow from "../models/follow.model.js"
 import LikeCourse from "../models/likecourse.model.js"
 import Notification from "../models/notification.model.js"
 import Post from "../models/post.model.js"
 import ScoreHistory from "../models/scorehistory.model.js"
 import User from "../models/user.model.js"
+
+function convertShortUserData(data = []) {
+    const shortData = data.map(item => {
+        let data = {
+            _id: item._id,
+            username: item.username,
+            firstName: item.firstName,
+            lastName: item.lastName,
+            avatar: item.avatar
+        }
+        return data;
+    })
+    return shortData;
+}
 
 export const updateUser = async (req, res) => {
     try {
@@ -33,8 +48,10 @@ export const deleteUser = async (req, res) => {
         }
         const user = await User.findById(req.params.id)
         if (!user) return res.status(404).json('User not found')
-        await BuyCourse.deleteMany({ userId: user._id })
-        await User.findByIdAndUpdate(user._id, { enable: req.userRole === 'admin' ? !user.enable : false })
+        await Promise.all([
+            BuyCourse.deleteMany({ userId: user._id }),
+            User.findByIdAndUpdate(user._id, { enable: req.userRole === 'admin' ? !user.enable : false })
+        ])
         res.status(200).json('User deleted')
     } catch (error) {
         res.status(500).json('Internal Server Error')
@@ -56,13 +73,17 @@ export const getFollowers = async (req, res) => {
         const page = req.query.page || 0
         const limit = req.query.limit || 20
         const userId = req.params.id
-        const followers = await Follow.find({ followingId: userId }).skip(page * limit).limit(limit);
-        const totalPages = await Follow.countDocuments({ followingId: userId })
-        const followerIds = followers.map(item => {
-            return item.userId
-        })
+        const [followers, totalPages] = await Promise.all([
+            Follow.find({ followingId: userId }).skip(page * limit).limit(limit),
+            Follow.countDocuments({ followingId: userId })
+        ])
+        const followerIds = followers.map(item => item.userId)
+        const followerUsersData = await Promise.all(
+            followerIds.map(id => User.findById(id))
+        )
+        const followerData = convertShortUserData(followerUsersData)
         res.status(200).json({
-            data: followerIds,
+            data: followerData,
             totalPages: Math.ceil(totalPages / limit)
         })
     } catch (error) {
@@ -75,13 +96,15 @@ export const getFollowings = async (req, res) => {
         const page = req.query.page || 0
         const limit = req.query.limit || 20
         const userId = req.params.id
-        const followings = await Follow.find({ userId }).skip(page * limit).limit(limit);
-        const totalPages = await Follow.countDocuments({ userId })
-        const followingIds = followings.map(item => {
-            return item.followingId
-        })
+        const [followings, totalPages] = await Promise.all([
+            Follow.find({ userId }).skip(page * limit).limit(limit),
+            Follow.countDocuments({ userId })
+        ])
+        const followingIds = followings.map(item => item.followingId)
+        const followingsUserData = await Promise.all(followingIds.map(id => User.findById(id)))
+        const followingData = convertShortUserData(followingsUserData)
         res.status(200).json({
-            data: followingIds,
+            data: followingData,
             totalPages: Math.ceil(totalPages / limit)
         })
     } catch (error) {
@@ -96,13 +119,16 @@ export const likedCourses = async (req, res) => {
         const userId = req.userId
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
-        const courses = await LikeCourse.find({ userId }).skip(page * limit).limit(limit)
-        const totalPages = await LikeCourse.countDocuments({ userId })
-        const courseIds = courses.map(item => {
-            return item._id
-        })
+        const [courses, totalPages] = await Promise.all([
+            LikeCourse.find({ userId }).skip(page * limit).limit(limit),
+            LikeCourse.countDocuments({ userId })
+        ])
+        const courseIds = courses.map(item => item._id)
+        const likedData = await Promise.all(
+            courseIds.map(id => Course.findById(id))
+        )
         res.status(200).json({
-            data: courseIds,
+            data: likedData,
             totalPages: Math.ceil(totalPages / limit)
         })
     } catch (error) {
@@ -117,10 +143,16 @@ export const buyedCourses = async (req, res) => {
         const userId = req.userId
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
-        const buyedList = await BuyCourse.find({ userId }).skip(page * limit).limit(limit)
-        const totalPages = await BuyCourse.countDocuments({ userId })
+        const [buyedList, totalPages] = await Promise.all([
+            BuyCourse.find({ userId }).skip(page * limit).limit(limit),
+            BuyCourse.countDocuments({ userId })
+        ])
+        const courseIds = buyedList.map(buy => buy.courseId)
+        const courseData = await Promise.all(
+            courseIds.map(id => Course.findById(id))
+        )
         res.status(200).json({
-            data: buyedList,
+            data: courseData,
             totalPages: Math.ceil(totalPages / limit)
         })
     } catch (error) {
@@ -132,10 +164,10 @@ export const blockedUsers = async (req, res) => {
     try {
         const userId = req.userId
         const blockedList = await BlockUser.find({ userId })
-        const blokedUserIds = blockedList.map(item => {
-            return item._id
-        })
-        res.status(200).json(blokedUserIds)
+        const blockedUserIds = blockedList.map(item => item.blockedId)
+        const usersData = await Promise.all(blockedUserIds.map(id => User.findById(id)))
+        const shortUserData = convertShortUserData(usersData)
+        res.status(200).json(shortUserData)
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
@@ -148,10 +180,16 @@ export const scoreHistory = async (req, res) => {
         const userId = req.userId
         const user = await User.findById(userId)
         if (!user) return res.status(404).json('User not found')
-        const scores = await ScoreHistory.find({ userId }).skip(page * limit).limit(limit)
-        const totalPages = await ScoreHistory.countDocuments({ userId })
+        const [scores, totalPages] = await Promise.all([
+            ScoreHistory.find({ userId }).skip(page * limit).limit(limit),
+            ScoreHistory.countDocuments({ userId })
+        ])
+        const courseIds = scores.map(score => score.courseId)
+        const courseDatas = await Promise.all(
+            courseIds.map(id => Course.findById(id))
+        )
         res.status(500).json({
-            data: scores,
+            data: courseDatas,
             totalPages: Math.ceil(totalPages / limit)
         })
     } catch (error) {
@@ -164,8 +202,10 @@ export const userPosts = async (req, res) => {
         const page = req.query.page || 0
         const limit = req.query.limit || 20
         const userId = req.params.id
-        const posts = await Post.find({ userId }).skip(page * limit).limit(limit)
-        const totalPages = await Post.countDocuments({ userId })
+        const [posts, totalPages] = await Promise.all([
+            Post.find({ userId }).skip(page * limit).limit(limit),
+            Post.countDocuments({ userId })
+        ])
         res.status(200).json({
             data: posts,
             totalPages: Math.ceil(totalPages / limit)
@@ -180,10 +220,12 @@ export const userNotifications = async (req, res) => {
         const page = req.query.page || 0
         const limit = req.query.limit || 20
         const notificationTo = req.userId
-        const notifications = await Notification.find({ notificationTo })
-            .skip(page * limit)
-            .limit(limit)
-        const totalPages = await Notification.countDocuments()
+        const [notifications, totalPages] = await Promise.all([
+            Notification.find({ notificationTo })
+                .skip(page * limit)
+                .limit(limit),
+            Notification.countDocuments()
+        ])
         res.status(200).json({
             data: notifications,
             totalPages: Math.ceil(totalPages / limit)
@@ -196,8 +238,8 @@ export const userNotifications = async (req, res) => {
 export const getTeachers = async (req, res) => {
     try {
         const teachers = await User.find({ role: 'teacher' })
-        const teachersData = teachers.map(item => item._id)
-        res.status(200).json(teachersData)
+        const teachersShortData = convertShortUserData(teachers)
+        res.status(200).json(teachersShortData)
     } catch (error) {
         res.status(500).json(error)
     }
@@ -207,14 +249,15 @@ export const getTeachersPaged = async (req, res) => {
     try {
         const limit = req.query.limit || 9
         const page = req.query.page || 0
-        const teachers = await User.find({ role: 'teacher' })
-            .skip(page * limit)
-            .limit(limit)
-
-        const totalCount = await User.countDocuments({ role: 'teacher' })
-        const teachersData = teachers.map(item => item._id)
+        const [teachers, totalCount] = await Promise.all([
+            User.find({ role: 'teacher' })
+                .skip(page * limit)
+                .limit(limit),
+            User.countDocuments({ role: 'teacher' })
+        ])
+        const teachersShortData = convertShortUserData(teachers)
         res.status(200).json({
-            data: teachersData,
+            data: teachersShortData,
             totalPages: Math.ceil(totalCount / limit)
         })
     } catch (error) {
@@ -226,14 +269,15 @@ export const getUsersPaged = async (req, res) => {
     try {
         const limit = 9
         const { page } = req.query
-        const users = await User.find({ role: 'user' })
-            .skip(page * limit)
-            .limit(limit)
-        const totalCount = await User.countDocuments({ role: 'user' })
-
-        const usersData = users.map(item => item._id)
+        const [users, totalCount] = await Promise.all([
+            User.find({ role: 'user' })
+                .skip(page * limit)
+                .limit(limit),
+            User.countDocuments({ role: 'user' })
+        ])
+        const usersShortData = convertShortUserData(users)
         res.status(200).json({
-            data: usersData,
+            data: usersShortData,
             totalPages: Math.ceil(totalCount / limit)
         })
     } catch (error) {
@@ -271,8 +315,10 @@ export const getNormalDiscovery = async (req, res) => {
         const page = req.query.page || 0
         const limit = req.query.limit || 10
         if (limit < 1) return res.status(200).json([])
-        const posts = await Post.find().skip(page * limit).limit(limit * 3)
-        const totalPages = await Post.countDocuments()
+        const [posts, totalPages] = await Promise.all([
+            Post.find().skip(page * limit).limit(limit * 3),
+            Post.countDocuments()
+        ])
         posts.sort(() => Math.random() - 0.5)
         let randomPosts = posts.slice(0, limit)
         res.status(200).json({
@@ -288,22 +334,21 @@ export const getNormalDiscovery = async (req, res) => {
 export const searchUser = async (req, res) => {
     try {
         const { username, page, limit } = req.query
-        const users = await User.find({
-            username: { $regex: username, $options: 'i' },
-            role: 'user'
-        })
-            .limit(limit)
-            .skip(page * limit)
-        const userInfos = users.map(user => {
-            const { _id } = user._doc
-            return _id
-        })
-        const usersCount = await User.countDocuments({
-            username: { $regex: username, $options: 'i' },
-            role: 'user'
-        })
+        const [users, usersCount] = await Promise.all([
+            User.find({
+                username: { $regex: username, $options: 'i' },
+                role: 'user'
+            })
+                .limit(limit)
+                .skip(page * limit),
+            User.countDocuments({
+                username: { $regex: username, $options: 'i' },
+                role: 'user'
+            })
+        ])
+        const usersShortData = convertShortUserData(users)
         const data = {
-            data: userInfos,
+            data: usersShortData,
             totalPages: Math.ceil(usersCount / limit)
         }
         res.status(200).json(data)
@@ -316,23 +361,22 @@ export const searchUser = async (req, res) => {
 export const searchTeacher = async (req, res) => {
     try {
         const { username, page, limit } = req.query
-        const users = await User.find({
-            username: { $regex: username, $options: 'i' },
-            role: 'teacher'
-        })
-            .limit(limit)
-            .skip(page * limit)
-        const userInfos = users.map(user => {
-            const { _id } = user._doc
-            return _id
-        })
-        const usersCount = await User.countDocuments({
-            username: { $regex: username, $options: 'i' },
-            role: 'teacher'
-        })
+        const [teachers, teachersCount] = await Promise.all([
+            User.find({
+                username: { $regex: username, $options: 'i' },
+                role: 'teacher'
+            })
+                .limit(limit)
+                .skip(page * limit),
+            User.countDocuments({
+                username: { $regex: username, $options: 'i' },
+                role: 'teacher'
+            })
+        ])
+        const teachersShortData = convertShortUserData(teachers)
         const data = {
-            data: userInfos,
-            totalPages: Math.ceil(usersCount / limit)
+            data: teachersShortData,
+            totalPages: Math.ceil(teachersCount / limit)
         }
         res.status(200).json(data)
     } catch (error) {

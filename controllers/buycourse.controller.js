@@ -8,15 +8,23 @@ export const buyCourse = async (req, res) => {
     try {
         const userId = req.body.userId
         const courseId = req.body.courseId
-        const course = await Course.findById(courseId)
-        const user = await User.findById(userId)
-        const userTeams = await Team.find({ "members": userId })
+        const [
+            course,
+            user,
+            userTeams
+        ] = await Promise.all([
+            Course.findById(courseId),
+            User.findById(userId),
+            Team.find({ "members": userId })
+        ])
         if (!course) return res.status(404).json("Course not found")
         const sameUserAndCourse = await BuyCourse.find({ userId, courseId })
         if (sameUserAndCourse?.length === 0) {
             const buyedCourse = await BuyCourse.create({ userId, courseId })
-            await User.findByIdAndUpdate(userId, { score: user.score + course.score }, { new: true })
-            await ScoreHistory.create({ userId, courseTitle: course.title, courseScore: course.score })
+            await Promise.all([
+                User.findByIdAndUpdate(userId, { score: user.score + course.score }, { new: true }),
+                ScoreHistory.create({ userId, courseId })
+            ])
             let teamMembers = []
             userTeams.map(team => {
                 teamMembers = [...teamMembers, ...team.members]

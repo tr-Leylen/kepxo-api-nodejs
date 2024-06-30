@@ -11,12 +11,16 @@ export const likePost = async (req, res) => {
         if (!post) return res.status(404).json('Post not found')
         const userLikedCurrentPost = await LikePost.find({ userId, postId })
         if (userLikedCurrentPost.length === 0) {
-            await LikePost.create({ userId, postId })
-            const notification = await Notification.create({
-                notificationTo: post.userId,
-                notificationFrom: userId,
-                actionType: 'like'
-            })
+            const data = await Promise.all([
+                LikePost.create({ userId, postId }),
+                Notification.create({
+                    notificationTo: post.userId,
+                    notificationFrom: userId,
+                    actionType: 'like'
+                })
+            ])
+
+            const notification = data[1]
             const socketId = userSockets[notification.notificationTo]
             if (socketId) {
                 req.io.to(socketId).emit('notification', notification)

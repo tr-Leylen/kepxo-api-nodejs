@@ -37,8 +37,10 @@ export const deleteConference = async (req, res) => {
     try {
         const conference = await Conference.findById(req.params.id)
         if (!conference) return res.status(404).json('Conference not found')
-        await JoinConference.deleteMany({ conferenceId: req.params.id })
-        await Conference.findByIdAndDelete(req.params.id)
+        await Promise.all([
+            JoinConference.deleteMany({ conferenceId: req.params.id }),
+            Conference.findByIdAndDelete(req.params.id)
+        ])
         res.status(200).json("Conference deleted")
     } catch (error) {
         res.status(500).json(error)
