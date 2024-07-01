@@ -11,13 +11,7 @@ import User from "../models/user.model.js"
 
 function convertShortUserData(data = []) {
     const shortData = data.map(item => {
-        let data = {
-            _id: item._id,
-            username: item.username,
-            firstName: item.firstName,
-            lastName: item.lastName,
-            avatar: item.avatar
-        }
+        const { password, ...data } = item._doc
         return data;
     })
     return shortData;

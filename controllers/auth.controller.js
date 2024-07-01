@@ -60,13 +60,12 @@ export const forgotPassword = async (req, res) => {
             from: 'elturanfcb@gmail.com',
             to: user.email,
             subject: 'Password Reset',
-            text: `Your token: ${token}`,
+            text: `http://45.9.190.138:5173/reset-password/${token}`,
         }
 
         await transporter.sendMail(mailOptions)
         res.status(200).json('Mail send')
     } catch (error) {
-        console.log(error)
         res.status(500).json(error)
     }
 }
