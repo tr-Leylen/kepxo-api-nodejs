@@ -1,7 +1,7 @@
 import express from "express"
 import mongoose from "mongoose"
 import dotenv from "dotenv"
-import { Server } from "socket.io"
+import {Server} from "socket.io"
 import http from 'http'
 import cors from 'cors'
 import jwt from 'jsonwebtoken'
@@ -34,14 +34,17 @@ import savedCardRoutes from "./routes/saved_card.route.js"
 import inviteTeamRoutes from "./routes/invite_team.route.js"
 import multer from "multer"
 import path from "path"
-import { fileURLToPath } from "url"
+import {fileURLToPath} from "url"
 import Photo from "./models/photo.model.js"
-import { verifyLogin } from "./utils/LoginMiddleware.js"
-import { MongoClient } from "mongodb"
-import { socketMiddleware } from "./utils/socketMiddleware.js"
+import {verifyLogin} from "./utils/LoginMiddleware.js"
+import {MongoClient} from "mongodb"
+import {socketMiddleware} from "./utils/socketMiddleware.js"
+import fs from "fs"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads');
 
 dotenv.config()
 const storage = multer.diskStorage({
@@ -52,7 +55,7 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + "-" + file.originalname)
     }
 })
-const upload = multer({ storage })
+const upload = multer({storage})
 const port = 4000
 const app = express()
 const server = http.createServer(app)
@@ -75,7 +78,7 @@ const options = {
                 url: 'http://localhost:4000/'
             }
         ],
-        security: [{ bearerAuth: [] }]
+        security: [{bearerAuth: []}]
     },
     apis: [
         './routes/*.js'
@@ -169,19 +172,25 @@ app.use("/api/starcourse", starCourseRoutes)
 app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
-
-app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOADS_DIR || 'uploads')));
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
-    await Photo.create({
-        userId: req.userId,
-        fileName: req.file?.filename,
-        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
-    })
-    res.json({
-        message: 'File uploaded successfully',
-        file: req.file,
-        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
-    })
+    try {
+        await Photo.create({
+            userId: req.userId,
+            fileName: req.file?.filename,
+            url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+        })
+        res.json({
+            message: 'File uploaded successfully',
+            file: req.file,
+            url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+        })
+    } catch (e) {
+        console.log(e)
+    }
 })
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
