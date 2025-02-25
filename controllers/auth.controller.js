@@ -60,7 +60,7 @@ export const forgotPassword = async (req, res) => {
             from: 'elturanfcb@gmail.com',
             to: user.email,
             subject: 'Password Reset',
-            text: `http://45.9.190.138:5173/reset-password/${token}`,
+            text: `${process.env.APP_URL}/reset-password/${token}`,
         }
 
         await transporter.sendMail(mailOptions)
