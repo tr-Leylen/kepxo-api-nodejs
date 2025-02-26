@@ -195,10 +195,21 @@ export const getAllCoursesAdmin = async (req, res) => {
     try {
         const page = req.query.page || 0
         const limit = req.query.limit || 20
-        const courses = await Course.find({ accepted: true }).skip(page * limit).limit(limit)
-        const totalPages = await Course.countDocuments({ accepted: true })
+        const [courses, totalPages] = await Promise.all([
+            await Course.find({ accepted: true }).skip(page * limit).limit(limit),
+            await Course.countDocuments({ accepted: true })
+        ])
+        let coursesData = await Promise.all(
+            courses.map(course => {
+                const owner = User.findById(course.ownerId)
+                return {
+                    ...course._doc,
+                    ownerName: owner?.username || null
+                }
+            })
+        )
         res.status(200).json({
-            data: courses,
+            data: coursesData,
             totalPages: Math.ceil(totalPages / limit)
         })
     } catch (error) {
