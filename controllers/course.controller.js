@@ -62,7 +62,12 @@ export const getCourse = async (req, res) => {
     try {
         const course = await Course.findById(req.params.id)
         if (!course) return res.status(404).json('Course not found');
-        res.status(200).json(course)
+        const category = await Category.findById(course.categoryId)
+        const courseInfo = {
+            ...course._doc,
+            categoryName: category.title
+        }
+        res.status(200).json(courseInfo)
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }
