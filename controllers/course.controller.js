@@ -48,9 +48,7 @@ export const deleteCourse = async (req, res) => {
         const course = await Course.findById(req.params.id)
         if (!course) return res.status(404).json("Course not found")
         if (role === 'teacher' && userId !== course.ownerId) return res.status(401).json('you can only delete your own course')
-        const courseBuyedList = await BuyCourse.find({ courseId: req.params.id })
-        courseBuyedList.map(async item => await BuyCourse.findByIdAndDelete(item._id))
-        if (!course.accepted) return res.status(400).json('Course waiting for accept!')
+        await BuyCourse.deleteMany({ courseId: req.params.id })
         const changedCourse = await Course.findByIdAndUpdate(req.params.id, { enable: !course.enable, accepted: course.enable ? false : true }, { new: true })
         res.status(200).json(changedCourse)
     } catch (error) {
@@ -148,9 +146,7 @@ export const courseLikedUsers = async (req, res) => {
         const courseId = req.params.id
         const likeArray = await LikeCourse.find({ courseId })
         const likedUserIds = likeArray.map(item => item.userId)
-        const users = await Promise.all(
-            likedUserIds.map(id => User.findById(id))
-        )
+        const users = await Promise.all(likedUserIds.map(id => User.findById(id)))
         const usersShortData = users.map(user => {
             let data = {
                 _id: user._id,
@@ -176,8 +172,7 @@ export const acceptCourse = async (req, res) => {
         const updatedCourse = await Course.findByIdAndUpdate(courseId, { accepted: !course.accepted, score }, { new: true })
         res.status(200).json(updatedCourse)
     } catch (error) {
-        console.log(error)
-        res.status(500).json('Internal Server Error')
+        res.status(500).json(error)
     }
 }
 
