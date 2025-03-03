@@ -16,8 +16,7 @@ export const setStar = async (req, res) => {
         if (!course) return res.status(404).json('Course not found')
         const starExists = await StarCourse.find({ userId: req.userId, courseId });
         if (starExists.length > 0) return res.status(400).json('Course stared by this user')
-        const scoredCourse = await StarCourse.create({ courseId, star, userId: req.userId });
-        const starAvg = await calcStar(courseId)
+        const [scoredCourse, starAvg] = await Promise.all([StarCourse.create({ courseId, star, userId: req.userId }), calcStar(courseId)])
         await Course.findByIdAndUpdate(courseId, { star: starAvg })
         res.status(201).json(scoredCourse)
     } catch (error) {
@@ -31,8 +30,10 @@ export const updateStar = async (req, res) => {
         const staredId = req.params.id
         const starExists = await StarCourse.find({ courseId, userId: req.userId });
         if (starExists.length === 0) return res.status(404).json('This course not stared');
-        const updatedStar = await StarCourse.findByIdAndUpdate(staredId, { star }, { new: true })
-        const starAvg = await calcStar(courseId)
+        const [updatedStar, starAvg] = await Promise.all([
+            StarCourse.findByIdAndUpdate(staredId, { star }, { new: true }),
+            calcStar(courseId)
+        ])
         await Course.findByIdAndUpdate(courseId, { star: starAvg })
         res.status(200).json(updatedStar)
     } catch (error) {

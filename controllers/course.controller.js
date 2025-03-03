@@ -48,9 +48,11 @@ export const deleteCourse = async (req, res) => {
         const course = await Course.findById(req.params.id)
         if (!course) return res.status(404).json("Course not found")
         if (role === 'teacher' && userId !== course.ownerId) return res.status(401).json('you can only delete your own course')
-        await BuyCourse.deleteMany({ courseId: req.params.id })
-        const changedCourse = await Course.findByIdAndUpdate(req.params.id, { enable: !course.enable, accepted: course.enable ? false : true }, { new: true })
-        res.status(200).json(changedCourse)
+        await Promise.all([
+            BuyCourse.deleteMany({ courseId: req.params.id }),
+            Course.findByIdAndDelete(course._id)
+        ])
+        res.status(200).json('Course deleted')
     } catch (error) {
         res.status(500).json('Internal Server Error')
     }

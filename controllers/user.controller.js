@@ -182,7 +182,7 @@ export const scoreHistory = async (req, res) => {
         const courseDatas = await Promise.all(
             courseIds.map(id => Course.findById(id))
         )
-        res.status(500).json({
+        res.status(200).json({
             data: courseDatas,
             totalPages: Math.ceil(totalPages / limit)
         })

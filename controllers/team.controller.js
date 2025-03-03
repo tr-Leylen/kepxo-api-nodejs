@@ -77,7 +77,6 @@ export const changeTeamName = async (req, res) => {
         if (!team) return res.status(404).json("Team not found")
         if (team.creatorId != creatorId) return res.status(403).json("You are not this team's creator")
         const updatedTeam = await Team.findByIdAndUpdate(teamId, { title: newTitle }, { new: true });
-
         res.status(200).json(updatedTeam)
     } catch (error) {
         res.status(500).json('Internal Server Error')
