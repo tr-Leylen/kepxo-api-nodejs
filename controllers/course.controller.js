@@ -105,9 +105,10 @@ export const searchCourse = async (req, res) => {
     try {
         const searchTerm = req.query.search || ''
         const category = req.query.category || ''
+
         const courses = await Course.find({
             title: {
-                $regex: searchTerm, $options: 'i'
+                $regex: searchTerm, $options: 'i',
             },
             category: {
                 $regex: category, $options: 'i'
@@ -123,8 +124,29 @@ export const searchCourse = async (req, res) => {
 export const searchCourseTitle = async (req, res) => {
     try {
         const { title, page, limit } = req.query;
+        const searchTitle = title || ''
+        let searchPattern = searchTitle.split('').map(char => {
+            switch (char.toLowerCase()) {
+                case 'i':
+                case 'ı':
+                    return '[iıIİ]';
+                case 's':
+                    return '[sşSŞ]';
+                case 'g':
+                    return '[gğGĞ]';
+                case 'u':
+                    return '[uüUÜ]';
+                case 'o':
+                    return '[oöOÖ]';
+                case 'c':
+                    return '[cçCÇ]';
+                default:
+                    // Diğer karakterler için regex escape yapılması gerekebilir
+                    return char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+        }).join('');
         const courses = Course.find({
-            title: { $regex: title, $options: 'i' },
+            title: { $regex: searchPattern, $options: 'i' },
             accepted: true
         })
             .limit(limit)
