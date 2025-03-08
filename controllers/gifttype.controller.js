@@ -38,11 +38,7 @@ export const deleteGiftType = async (req, res) => {
         const giftType = await GiftType.findById(id)
         if (!giftType) return res.status(404).json('Gift type not found');
         const gifts = await Gift.find({ giftType: giftType._id })
-        await Promise.all(
-            gifts.map(async item => {
-                await deletePhoto(item.image)
-            })
-        )
+        await Promise.all(gifts.map(item => deletePhoto(item.image)))
         await Promise.all([
             Gift.deleteMany({ giftType: id }),
             GiftType.findByIdAndDelete(id)

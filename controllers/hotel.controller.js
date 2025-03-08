@@ -55,7 +55,7 @@ export const deleteHotel = async (req, res) => {
         const hotelId = req.params.id
         const hotel = await Hotel.findById(hotelId)
         if (!hotel) throw new Error('Hotel not found')
-        hotel.images.map(async image => await deletePhoto(image))
+        await Promise.all(hotel.images.map(image => deletePhoto(image)))
         await Hotel.findByIdAndDelete(hotelId)
         res.status(200).json('Hotel deleted')
     } catch (error) {
