@@ -121,8 +121,14 @@ export const searchCourse = async (req, res) => {
 export const searchCourseTitle = async (req, res) => {
     try {
         const { title, page, limit } = req.query;
+        if (!title) {
+            return res.status(400).json('Title gereklidir')
+        }
+        const regexTitle = title
+            .replace(/i/g, "[iİ]")
+            .replace(/ı/g, "[ıI]");
         const courses = Course.find({
-            title: { $regex: title, $options: 'i' },
+            title: { $regex: regexTitle, $options: 'i' },
             accepted: true
         })
             .limit(limit)

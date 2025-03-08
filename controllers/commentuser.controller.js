@@ -1,4 +1,5 @@
 import CommentUser from "../models/commentuser.model.js"
+import User from "../models/user.model.js"
 
 export const addCommentUser = async (req, res) => {
     try {
@@ -45,9 +46,19 @@ export const viewComment = async (req, res) => {
     try {
         const commentId = req.params.id
         const comment = await CommentUser.findById(commentId)
+        const [commentUserName, userName] = await Promise.all([
+            User.findById(comment.commentUserId),
+            User.findById(comment.userId),
+        ])
         if (!comment) return res.status(404).json('Comment not found')
-        res.status(200).json(comment)
+        const commentData = {
+            ...comment._doc,
+            userName: userName?.username,
+            commentUserName: commentUserName?.username
+        }
+        res.status(200).json(commentData)
     } catch (error) {
+        console.log(error)
         res.status(500).json('Internal Server Error')
     }
 }
