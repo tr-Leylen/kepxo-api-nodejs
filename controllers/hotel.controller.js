@@ -1,9 +1,20 @@
 import Hotel from "../models/hotel.model.js"
 import { deletePhoto } from "../deletePhoto.js"
 
+const getExistHotel = async (id) => {
+    const hotel = await Hotel.findById(id)
+    if (!hotel) return res.status(404).json('Hotel not found');
+    return hotel
+}
+
+const hotelValidation = (body) => {
+    if (body.star > 5) return res.status(400).json('Star value must be max 5')
+    if (body.score < 0) return res.status(400).json('Score can not be negative')
+}
+
 export const createHotel = async (req, res) => {
     try {
-        if (req.body.star > 5) return res.status(400).json('Star value must be max 5')
+        hotelValidation(req.body)
         const newHotel = await Hotel.create(req.body)
         res.status(201).json(newHotel)
     } catch (error) {
@@ -13,13 +24,12 @@ export const createHotel = async (req, res) => {
 
 export const updateHotel = async (req, res) => {
     try {
-        const hotelId = req.params.id
-        const hotel = await Hotel.findById(hotelId)
-        if (!hotel) throw new Error('Hotel not found');
-        if (req.body.star > 5) return res.status(400).json('Star value must be max 5')
-        const updatedHotel = await Hotel.findByIdAndUpdate(hotelId, req.body, { new: true })
+        getExistHotel(req.params.id)
+        hotelValidation(req.body)
+        const updatedHotel = await Hotel.findByIdAndUpdate(req.params.id, req.body, { new: true })
         res.status(200).json(updatedHotel)
     } catch (error) {
+        console.log(error)
         res.status(500).json(error)
     }
 }

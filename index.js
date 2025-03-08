@@ -1,7 +1,7 @@
 import express from "express"
 import mongoose from "mongoose"
 import dotenv from "dotenv"
-import {Server} from "socket.io"
+import { Server } from "socket.io"
 import http from 'http'
 import cors from 'cors'
 import jwt from 'jsonwebtoken'
@@ -21,6 +21,7 @@ import notificationRoutes from './routes/notification.route.js'
 import likePostRoutes from './routes/likepost.route.js'
 import likeUserRoutes from './routes/likeuser.route.js'
 import buyGiftRoutes from './routes/buygift.route.js'
+import buyHotelRoutes from './routes/buyhotel.route.js'
 import giftRoutes from './routes/gift.route.js'
 import Notification from "./models/notification.model.js"
 import User from "./models/user.model.js"
@@ -34,11 +35,11 @@ import savedCardRoutes from "./routes/saved_card.route.js"
 import inviteTeamRoutes from "./routes/invite_team.route.js"
 import multer from "multer"
 import path from "path"
-import {fileURLToPath} from "url"
+import { fileURLToPath } from "url"
 import Photo from "./models/photo.model.js"
-import {verifyLogin} from "./utils/LoginMiddleware.js"
-import {MongoClient} from "mongodb"
-import {socketMiddleware} from "./utils/socketMiddleware.js"
+import { verifyLogin } from "./utils/LoginMiddleware.js"
+import { MongoClient } from "mongodb"
+import { socketMiddleware } from "./utils/socketMiddleware.js"
 import fs from "fs"
 
 const __filename = fileURLToPath(import.meta.url);
@@ -55,7 +56,7 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + "-" + file.originalname)
     }
 })
-const upload = multer({storage})
+const upload = multer({ storage })
 const port = 4000
 const app = express()
 const server = http.createServer(app)
@@ -78,7 +79,7 @@ const options = {
                 url: 'http://localhost:4000/'
             }
         ],
-        security: [{bearerAuth: []}]
+        security: [{ bearerAuth: [] }]
     },
     apis: [
         './routes/*.js'
@@ -162,6 +163,7 @@ app.use("/api/notification", notificationRoutes)
 app.use("/api/likepost", socketMiddleware(io), likePostRoutes)
 app.use("/api/likeuser", likeUserRoutes)
 app.use("/api/buygift", buyGiftRoutes)
+app.use("/api/buyhotel", buyHotelRoutes)
 app.use("/api/gift", giftRoutes)
 app.use("/api/category", categoryRoutes)
 app.use("/api/gifttype", giftTypeRoutes)

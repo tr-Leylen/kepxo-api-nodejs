@@ -15,7 +15,7 @@ const hotelSchema = new mongoose.Schema({
     },
     score: {
         type: Number,
-        default: 0
+        required: true
     },
     avatar: {
         type: String
