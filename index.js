@@ -58,7 +58,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config()
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, process.env.UPLOADS_DIR)
+        cb(null, path.join(__dirname, 'uploads'))
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + "-" + file.originalname)
@@ -205,18 +205,25 @@ app.use("/api/invite-team", inviteTeamRoutes)
 // })
 
 // old version
-app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOADS_DIR || 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
-    await Photo.create({
-        userId: req.userId,
-        fileName: req.file?.filename,
-        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
-    })
-    res.json({
-        message: 'File uploaded successfully',
-        file: req.file,
-        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
-    })
+    try {
+        if (!req.file) {
+            return res.status(400).json("File upload failed");
+        }
+        await Photo.create({
+            userId: req.userId,
+            fileName: req.file?.filename,
+            url: `${process.env.APP_URL}/uploads/${req.file?.filename}`
+        })
+        res.json({
+            message: 'File uploaded successfully',
+            file: req.file,
+            url: `${process.env.APP_URL}/uploads/${req.file?.filename}`
+        })
+    } catch (error) {
+        res.status(500).json(error)
+    }
 })
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
