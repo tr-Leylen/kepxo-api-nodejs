@@ -58,6 +58,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config()
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+        console.log(path.join(__dirname, 'uploads'))
         cb(null, path.join(__dirname, 'uploads'))
     },
     filename: function (req, file, cb) {
@@ -206,7 +207,7 @@ app.use("/api/invite-team", inviteTeamRoutes)
 
 // old version
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
+app.post('/api/photo', upload.single('file'), verifyLogin, async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json("File upload failed");
