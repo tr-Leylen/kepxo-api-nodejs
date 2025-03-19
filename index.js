@@ -51,7 +51,6 @@ const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
-console.log(`Created uploads directory: ${uploadsDir}`);
 
 dotenv.config()
 const storage = multer.diskStorage({
@@ -190,12 +189,12 @@ app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
         await Photo.create({
             userId: req.userId,
             fileName: req.file?.filename,
-            url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+            url: `${process.env.APP_URL}/uploads/${req.file?.filename}`
         })
         res.json({
             message: 'File uploaded successfully',
             file: req.file,
-            url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+            url: `${process.env.APP_URL}/uploads/${req.file?.filename}`
         })
     } catch (e) {
         console.log(e, 'upload hatasi')
