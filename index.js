@@ -42,13 +42,18 @@ import { MongoClient } from "mongodb"
 import { socketMiddleware } from "./utils/socketMiddleware.js"
 import fs from "fs"
 
+// new version
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+// if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
+//     fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
+// }
+// const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads/');
+
+// old version
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
-    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
-}
-const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads/');
 
 dotenv.config()
 const storage = multer.diskStorage({
@@ -177,25 +182,41 @@ app.use("/api/starcourse", starCourseRoutes)
 app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
-app.use('/uploads', express.static(uploadsDir));
+// new version
+// app.use('/uploads', express.static(uploadsDir));
+// app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
+//     try {
+//         if (!req.file) {
+//             return res.status(400).json("Dosya yüklenmedi!");
+//         }
+//         await Photo.create({
+//             userId: req.userId,
+//             fileName: req.file?.filename,
+//             url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+//         })
+//         res.json({
+//             message: 'File uploaded successfully',
+//             file: req.file,
+//             url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+//         })
+//     } catch (e) {
+//         console.log(e)
+//     }
+// })
+
+// old version
+app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOADS_DIR || 'uploads')));
 app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json("Dosya yüklenmedi!");
-        }
-        await Photo.create({
-            userId: req.userId,
-            fileName: req.file?.filename,
-            url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
-        })
-        res.json({
-            message: 'File uploaded successfully',
-            file: req.file,
-            url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
-        })
-    } catch (e) {
-        console.log(e)
-    }
+    await Photo.create({
+        userId: req.userId,
+        fileName: req.file?.filename,
+        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+    })
+    res.json({
+        message: 'File uploaded successfully',
+        file: req.file,
+        url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
+    })
 })
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
