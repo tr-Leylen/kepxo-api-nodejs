@@ -50,8 +50,8 @@ const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads');
 
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log(`Created uploads directory: ${uploadsDir}`);
 }
+console.log(`Created uploads directory: ${uploadsDir}`);
 
 dotenv.config()
 const storage = multer.diskStorage({
