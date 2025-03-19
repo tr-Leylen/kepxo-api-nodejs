@@ -66,6 +66,7 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage })
 const port = 4000
+const testPort = 4001
 const app = express()
 const server = http.createServer(app)
 const io = new Server(server, {
@@ -226,4 +227,4 @@ app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
     }
 })
 
-server.listen(port, () => console.log(`backend running on ${port} port`))
+server.listen(testPort, () => console.log(`backend running on ${testPort} port`))
