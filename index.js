@@ -42,28 +42,26 @@ import { MongoClient } from "mongodb"
 import { socketMiddleware } from "./utils/socketMiddleware.js"
 import fs from "fs"
 
-// new version
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
-    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
-}
-const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads/');
+// Uploads dizinini standartlaştırın (sondaki slash olmadan)
+const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads');
 
-// old version
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log(`Created uploads directory: ${uploadsDir}`);
+}
 
 dotenv.config()
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, 'uploads'))
+        cb(null, uploadsDir);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname)
+        cb(null, Date.now() + '-' + file.originalname);
     }
-})
+});
 const upload = multer({ storage })
 const port = 4000
 const app = express()
@@ -183,7 +181,7 @@ app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
 // new version
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
     try {
         if (!req.file) {
@@ -200,7 +198,7 @@ app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
             url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
         })
     } catch (e) {
-        console.log(e,'upload hatasi')
+        console.log(e, 'upload hatasi')
     }
 })
 
