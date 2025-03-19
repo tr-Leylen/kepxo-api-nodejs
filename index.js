@@ -214,12 +214,12 @@ app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
         await Photo.create({
             userId: req.userId,
             fileName: req.file?.filename,
-            url: `${process.env.APP_URL}/uploads/${req.file?.filename}`
+            url: `${process.env.APP_URL}uploads/${req.file?.filename}`
         })
         res.json({
             message: 'File uploaded successfully',
             file: req.file,
-            url: `${process.env.APP_URL}/uploads/${req.file?.filename}`
+            url: `${process.env.APP_URL}uploads/${req.file?.filename}`
         })
     } catch (error) {
         res.status(500).json(error)
