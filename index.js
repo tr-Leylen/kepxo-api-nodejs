@@ -43,22 +43,21 @@ import { socketMiddleware } from "./utils/socketMiddleware.js"
 import fs from "fs"
 
 // new version
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-
-// if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
-//     fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
-// }
-// const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads/');
-
-// old version
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
+    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
+}
+const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads/');
+
+// old version
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
 dotenv.config()
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        console.log(path.join(__dirname, 'uploads'))
         cb(null, path.join(__dirname, 'uploads'))
     },
     filename: function (req, file, cb) {
@@ -184,47 +183,47 @@ app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
 // new version
-// app.use('/uploads', express.static(uploadsDir));
-// app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).json("Dosya yüklenmedi!");
-//         }
-//         await Photo.create({
-//             userId: req.userId,
-//             fileName: req.file?.filename,
-//             url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
-//         })
-//         res.json({
-//             message: 'File uploaded successfully',
-//             file: req.file,
-//             url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
-//         })
-//     } catch (e) {
-//         console.log(e)
-//     }
-// })
-
-// old version
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.post('/api/photo', upload.single('file'), verifyLogin, async (req, res) => {
+app.use('/uploads', express.static(uploadsDir));
+app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json("File upload failed");
+            return res.status(400).json("Dosya yüklenmedi!");
         }
         await Photo.create({
             userId: req.userId,
             fileName: req.file?.filename,
-            url: `${process.env.APP_URL}uploads/${req.file?.filename}`
+            url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
         })
         res.json({
             message: 'File uploaded successfully',
             file: req.file,
-            url: `${process.env.APP_URL}uploads/${req.file?.filename}`
+            url: `${process.env.APP_URL}${process.env.UPLOADS_DIR + req.file?.filename}`
         })
-    } catch (error) {
-        res.status(500).json(error)
+    } catch (e) {
+        console.log(e,'upload hatasi')
     }
 })
+
+// old version
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// app.post('/api/photo', upload.single('file'), verifyLogin, async (req, res) => {
+//     try {
+//         if (!req.file) {
+//             return res.status(400).json("File upload failed");
+//         }
+//         await Photo.create({
+//             userId: req.userId,
+//             fileName: req.file?.filename,
+//             url: `${process.env.APP_URL}uploads/${req.file?.filename}`
+//         })
+//         res.json({
+//             message: 'File uploaded successfully',
+//             file: req.file,
+//             url: `${process.env.APP_URL}uploads/${req.file?.filename}`
+//         })
+//     } catch (error) {
+//         res.status(500).json(error)
+//     }
+// })
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
