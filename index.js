@@ -58,10 +58,9 @@ if (!fs.existsSync(uploadsDir)) {
 
 dotenv.config()
 const storage = multer.diskStorage({
-    // destination: function (req, file, cb) {
-    //     cb(null, uploadsDir);
-    // },
-    destination: 'https://api.kepxo.com.tr/uploads/',
+    destination: function (req, file, cb) {
+        cb(null, uploadsDir);
+    },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname);
     }
@@ -101,50 +100,12 @@ const swaggerSpec = swaggerJSDoc(options)
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-
-// async function initiateReplicaSet() {
-//     const client = new MongoClient(process.env.MONGO, { useUnifiedTopology: true });
-//     try {
-//         await client.connect();
-//         const adminDb = client.db().admin();
-//         const replSetStatus = await adminDb.command({ replSetGetStatus: 1 });
-
-//         // Replika set zaten başlatılmışsa hiçbir şey yapmayın
-//         if (replSetStatus.ok) {
-//             console.log('Replika set zaten başlatılmış.');
-//             return;
-//         }
-//     } catch (error) {
-//         if (error.codeName === 'NotYetInitialized') {
-//             console.log('Replika set başlatılıyor...');
-//             await client.db().admin().command({ replSetInitiate: {} });
-//             console.log('Replika set başlatıldı.');
-//         } else {
-//             console.error('Replika set başlatılırken hata oluştu:', error);
-//         }
-//     } finally {
-//         await client.close();
-//     }
-// }
-
 await mongoose.connect(process.env.MONGO, {
     authSource: "admin",
     user: process.env.MONGO_USER,
     pass: process.env.MONGO_PASS,
 }).then(() => console.log('DB Connected')).catch(err => console.log(err));
 
-const connection = mongoose.connection;
-
-// connection.once('open', (req, res) => {
-//     console.log('DB connection is open')
-//     const notificationChangeStream = Notification.watch()
-//     notificationChangeStream.on('change', (change) => {
-//         if (change.operationType === 'insert') {
-//             const notification = change.fullDocument
-//             io.emit('notification', notification)
-//         }
-//     })
-// })
 export const userSockets = {}
 io.on('connection', (socket) => {
     let user_id;
