@@ -146,7 +146,7 @@ app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
 // new version
-app.use('/uploads', express.static('/uploads'));
+app.use('/uploads', express.static());
 app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
     try {
         if (!req.file) {
