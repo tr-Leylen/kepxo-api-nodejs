@@ -45,7 +45,7 @@ import fs from "fs"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads');
+const uploadsDir = path.resolve(__dirname, process.env.UPLOADS_DIR || 'uploads');
 
 if (!fs.existsSync(uploadsDir)) {
     try {
