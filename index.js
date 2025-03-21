@@ -55,14 +55,13 @@ if (!fs.existsSync(uploadsDir)) {
         console.log(error)
     }
 }
-console.log('file path:', uploadsDir)
 
 dotenv.config()
 const storage = multer.diskStorage({
     // destination: function (req, file, cb) {
     //     cb(null, uploadsDir);
     // },
-    destination: 'uploads/',
+    destination: 'https://api.kepxo.com.tr/uploads/',
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname);
     }
