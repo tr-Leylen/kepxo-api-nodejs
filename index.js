@@ -49,7 +49,7 @@ const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads');
 
 if (!fs.existsSync('/uploads')) {
     try {
-        fs.mkdirSync(uploadsDir, { recursive: true });
+        fs.mkdirSync('/uploads', { recursive: true });
         console.log('UPLOADS FOLDER CREATED')
     } catch (error) {
         console.log(error)
@@ -146,7 +146,7 @@ app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
 // new version
-app.use('/uploads', express.static(uploadsDir));
+app.use('/uploads', express.static('/uploads'));
 app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
     try {
         if (!req.file) {
