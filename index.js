@@ -169,7 +169,7 @@ app.post('/api/photo', upload.single('file'), verifyLogin, async (req, res) => {
         res.status(500).json(error)
     }
 })
-app.get('/test-image', (req, res) => {
+app.get('/api/test-image', (req, res) => {
     res.send(
         `<html>
         <body>
