@@ -149,7 +149,7 @@ app.use("/api/invite-team", inviteTeamRoutes)
 
 
 
-app.use('/uploads', express.static(uploadsDir));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.post('/api/photo', upload.single('file'), verifyLogin, async (req, res) => {
     try {
         if (!req.file) {
