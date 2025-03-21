@@ -58,6 +58,17 @@ if (!fs.existsSync(uploadsDir)) {
     console.log(uploadsDir)
 }
 
+console.log(`Directory exists: ${fs.existsSync(uploadsDir)}`);
+try {
+  // Try to write a test file
+  fs.writeFileSync(`${uploadsDir}/test.txt`, 'test');
+  console.log('Successfully wrote test file');
+  fs.unlinkSync(`${uploadsDir}/test.txt`);
+  console.log('Successfully deleted test file');
+} catch (e) {
+  console.log(`Permission error: ${e.message}`);
+}
+
 dotenv.config()
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
