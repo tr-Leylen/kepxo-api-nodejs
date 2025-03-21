@@ -47,7 +47,7 @@ const __dirname = path.dirname(__filename);
 
 const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads');
 
-if (!fs.existsSync(uploadsDir)) {
+if (!fs.existsSync('/uploads')) {
     try {
         fs.mkdirSync(uploadsDir, { recursive: true });
         console.log('UPLOADS FOLDER CREATED')
