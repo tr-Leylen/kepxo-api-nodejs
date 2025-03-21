@@ -47,13 +47,15 @@ const __dirname = path.dirname(__filename);
 
 const uploadsDir = path.join(__dirname, process.env.UPLOADS_DIR || 'uploads');
 
-if (!fs.existsSync('/uploads')) {
+if (!fs.existsSync(uploadsDir)) {
     try {
-        fs.mkdirSync('/uploads', { recursive: true });
+        fs.mkdirSync(uploadsDir, { recursive: true });
         console.log('UPLOADS FOLDER CREATED')
     } catch (error) {
         console.log(error)
     }
+} else {
+    console.log(uploadsDir)
 }
 
 dotenv.config()
@@ -145,12 +147,13 @@ app.use("/api/starcourse", starCourseRoutes)
 app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
-// new version
-app.use('/uploads', express.static());
-app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
+
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.post('/api/photo', upload.single('file'), verifyLogin, async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json("Dosya yüklenmedi!");
+            return res.status(400).json("File upload failed");
         }
         await Photo.create({
             userId: req.userId,
@@ -162,31 +165,9 @@ app.post("/api/photo", upload.single('file'), verifyLogin, async (req, res) => {
             file: req.file,
             url: `${process.env.APP_URL}uploads/${req.file?.filename}`
         })
-    } catch (e) {
-        console.log(e, 'upload hatasi')
+    } catch (error) {
+        res.status(500).json(error)
     }
 })
-
-// old version
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// app.post('/api/photo', upload.single('file'), verifyLogin, async (req, res) => {
-//     try {
-//         if (!req.file) {
-//             return res.status(400).json("File upload failed");
-//         }
-//         await Photo.create({
-//             userId: req.userId,
-//             fileName: req.file?.filename,
-//             url: `${process.env.APP_URL}uploads/${req.file?.filename}`
-//         })
-//         res.json({
-//             message: 'File uploaded successfully',
-//             file: req.file,
-//             url: `${process.env.APP_URL}uploads/${req.file?.filename}`
-//         })
-//     } catch (error) {
-//         res.status(500).json(error)
-//     }
-// })
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
