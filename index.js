@@ -102,6 +102,8 @@ const swaggerSpec = swaggerJSDoc(options)
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 await mongoose.connect(process.env.MONGO, {
     authSource: "admin",
     user: process.env.MONGO_USER,
@@ -148,8 +150,6 @@ app.use("/api/saved-card", savedCardRoutes)
 app.use("/api/invite-team", inviteTeamRoutes)
 
 
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.post('/api/photo', upload.single('file'), verifyLogin, async (req, res) => {
     try {
         if (!req.file) {
