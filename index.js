@@ -173,7 +173,7 @@ app.get('/api/test-image', (req, res) => {
     res.send(
         `<html>
         <body>
-            <image src="/uploads/1742526090206-logo.png" alt='Upload image'/>
+            <image src="./uploads/1742526090206-logo.png" alt='Upload image'/>
         </body>
     </html>`
     )
