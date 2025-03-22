@@ -197,6 +197,6 @@ apiRouter.post('/photo', upload.single('file'), verifyLogin, async (req, res) =>
     }
 })
 
-app.use('/api', apiRouter)
+// app.use('/api', apiRouter)
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
