@@ -48,7 +48,7 @@ const __dirname = path.dirname(__filename);
 
 const uploadsDir = path.resolve(__dirname, process.env.UPLOADS_DIR || 'uploads');
 
-const localUploads = process.env.LOCAL_UPLOADS
+const uploadsFolder = process.env.SERVER_UPLOADS
 
 if (!fs.existsSync(uploadsDir)) {
     try {
@@ -63,7 +63,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, localUploads);
+        cb(null, uploadsFolder);
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname);
@@ -104,7 +104,7 @@ const swaggerSpec = swaggerJSDoc(options)
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-app.use('/uploads', express.static(localUploads));
+app.use('/uploads', express.static(uploadsFolder));
 
 await mongoose.connect(process.env.MONGO, {
     authSource: "admin",
