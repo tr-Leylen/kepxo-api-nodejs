@@ -111,7 +111,7 @@ const swaggerSpec = swaggerJSDoc(options)
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-app.use('/api/uploads', express.static(uploadsFolder));
+app.use('/uploads', express.static(uploadsFolder));
 
 await mongoose.connect(process.env.MONGO, {
     authSource: "admin",
