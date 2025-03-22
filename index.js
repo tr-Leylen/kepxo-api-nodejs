@@ -67,8 +67,13 @@ const storage = multer.diskStorage({
         cb(null, uploadsFolder);
     },
     filename: function (req, file, cb) {
-        cb(null, v4());
-        // cb(null, Date.now() + '-' + file.originalname);
+        const fileLast = file.originalname.split(".").at(-1)
+        if (fileLast.length > 1) {
+            cb(null, `${v4()}.${fileLast}`);
+            // cb(null, Date.now() + '-' + file.originalname);
+        } else {
+            console.log('Dosya uzantisi yok')
+        }
     }
 });
 const upload = multer({ storage })
