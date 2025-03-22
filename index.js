@@ -67,7 +67,8 @@ const storage = multer.diskStorage({
         cb(null, uploadsFolder);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
+        cb(null, v4());
+        // cb(null, Date.now() + '-' + file.originalname);
     }
 });
 const upload = multer({ storage })
@@ -186,7 +187,6 @@ apiRouter.post('/photo', upload.single('file'), verifyLogin, async (req, res) =>
         const photo = {
             userId: req.userId,
             fileName: req.file?.filename,
-            url: v4()
         }
         await Photo.create(photo)
         res.json({
