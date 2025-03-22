@@ -192,6 +192,7 @@ apiRouter.post('/photo', upload.single('file'), verifyLogin, async (req, res) =>
         const photo = {
             userId: req.userId,
             fileName: req.file?.filename,
+            url: req.file?.filename,
         }
         await Photo.create(photo)
         res.json({
