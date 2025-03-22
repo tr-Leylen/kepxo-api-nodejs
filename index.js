@@ -76,7 +76,7 @@ const storage = multer.diskStorage({
         }
     }
 });
-const upload = multer({ storage })
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } })
 const port = 4000
 const app = express()
 const server = http.createServer(app)
