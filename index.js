@@ -42,10 +42,13 @@ import { MongoClient } from "mongodb"
 import { socketMiddleware } from "./utils/socketMiddleware.js"
 import fs from "fs"
 
+dotenv.config()
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const uploadsDir = path.resolve(__dirname, process.env.UPLOADS_DIR || 'uploads');
+
+const localUploads = process.env.LOCAL_UPLOADS
 
 if (!fs.existsSync(uploadsDir)) {
     try {
@@ -58,10 +61,9 @@ if (!fs.existsSync(uploadsDir)) {
     console.log(uploadsDir)
 }
 
-dotenv.config()
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, uploadsDir);
+        cb(null, localUploads);
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + '-' + file.originalname);
@@ -102,7 +104,7 @@ const swaggerSpec = swaggerJSDoc(options)
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(localUploads));
 
 await mongoose.connect(process.env.MONGO, {
     authSource: "admin",
