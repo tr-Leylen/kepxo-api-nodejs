@@ -41,6 +41,7 @@ import { verifyLogin } from "./utils/LoginMiddleware.js"
 import { MongoClient } from "mongodb"
 import { socketMiddleware } from "./utils/socketMiddleware.js"
 import fs from "fs"
+import { v4 } from 'uuid'
 
 dotenv.config()
 const __filename = fileURLToPath(import.meta.url);
@@ -104,7 +105,7 @@ const swaggerSpec = swaggerJSDoc(options)
 app.use(express.json())
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-app.use('/uploads', express.static(uploadsFolder));
+app.use('/api/uploads', express.static(uploadsFolder));
 
 await mongoose.connect(process.env.MONGO, {
     authSource: "admin",
@@ -182,21 +183,21 @@ apiRouter.post('/photo', upload.single('file'), verifyLogin, async (req, res) =>
         if (!req.file) {
             return res.status(400).json("File upload failed");
         }
-        await Photo.create({
+        const photo = {
             userId: req.userId,
             fileName: req.file?.filename,
-            url: `${process.env.APP_URL}uploads/${req.file?.filename}`
-        })
+            url: v4()
+        }
+        await Photo.create(photo)
         res.json({
             message: 'File uploaded successfully',
-            file: req.file,
-            url: `${process.env.APP_URL}uploads/${req.file?.filename}`
+            ...photo
         })
     } catch (error) {
         res.status(500).json(error)
     }
 })
 
-// app.use('/api', apiRouter)
+app.use('/api', apiRouter)
 
 server.listen(port, () => console.log(`backend running on ${port} port`))
