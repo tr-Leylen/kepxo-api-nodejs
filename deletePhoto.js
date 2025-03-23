@@ -10,7 +10,7 @@ export const deletePhoto = async (url) => {
         if (!url) return
         const photo = await Photo.findOne({ url })
         const fileName = photo?.fileName
-        const filepath = path.join(uploadsFolder, fileName);
+        const filepath = path.join(uploadsFolder.toString(), fileName);
         console.log(uploadsFolder, 'log')
         console.log(filepath, 'log')
         fs.unlink(filepath.toString(), async (err) => {
