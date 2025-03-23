@@ -51,17 +51,6 @@ const uploadsDir = path.resolve(__dirname, process.env.UPLOADS_DIR || 'uploads')
 
 const uploadsFolder = process.env.SERVER_UPLOADS
 
-if (!fs.existsSync(uploadsDir)) {
-    try {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-        console.log('UPLOADS FOLDER CREATED')
-    } catch (error) {
-        console.log(error)
-    }
-} else {
-    console.log(uploadsDir)
-}
-
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, uploadsFolder);
