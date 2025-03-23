@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const photoSchema = new mongoose.Schema({
     url: {
         type: String,
-        required: false
+        required: true
     },
     fileName: {
         type: String,
