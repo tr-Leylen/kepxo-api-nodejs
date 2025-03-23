@@ -3,15 +3,14 @@ import { fileURLToPath } from "url"
 import Photo from "./models/photo.model.js";
 import fs from 'fs'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const uploadsFolder = process.env.SERVER_UPLOADS
 
 export const deletePhoto = async (url) => {
     try {
         if (!url) return
         const photo = await Photo.findOne({ url })
         const fileName = photo?.fileName
-        const filepath = path.join(__dirname, process.env.UPLOADS_DIR, fileName);
+        const filepath = path.join(uploadsFolder, fileName);
         fs.unlink(filepath, async (err) => {
             if (err) {
                 console.log(err)
