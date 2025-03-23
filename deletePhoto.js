@@ -13,7 +13,7 @@ export const deletePhoto = async (url) => {
         const filepath = path.join(uploadsFolder, fileName);
         console.log(uploadsFolder, 'log')
         console.log(filepath, 'log')
-        fs.unlink(filepath, async (err) => {
+        fs.unlink(filepath.toString(), async (err) => {
             if (err) {
                 console.log(err)
                 return;
