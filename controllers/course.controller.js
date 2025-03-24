@@ -94,7 +94,7 @@ export const getTeacherCourses = async (req, res) => {
 export const getRecommendedCourses = async (req, res) => {
     try {
         const courses = await Course.find({ accepted: true })
-            .sort({ 'score': -1 })
+            .sort({ 'star': -1 })
             .limit(10)
         res.status(200).json(courses)
     } catch (error) {
