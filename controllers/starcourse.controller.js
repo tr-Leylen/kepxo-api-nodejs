@@ -1,6 +1,8 @@
 import Course from "../models/course.model.js";
 import StarCourse from "../models/starcourse.model.js"
 
+const possibleStarValues = [1, 2, 3, 4, 5]
+
 const calcStar = async (courseId) => {
     const courseStars = await StarCourse.find({ courseId })
     const starPoints = courseStars.reduce((acc, item) => acc += item.star, 0)
@@ -11,15 +13,16 @@ const calcStar = async (courseId) => {
 export const setStar = async (req, res) => {
     try {
         const { star, courseId } = req.body
-        if (star > 5 && star < 1 && star % 1 != 0) return res.status(400).json('Star value is incorrect');
+        if (!possibleStarValues.includes(+star)) return res.status(400).json('Star value is incorrect');
         const course = await Course.findById(courseId)
         if (!course) return res.status(404).json('Course not found')
         const starExists = await StarCourse.find({ userId: req.userId, courseId });
         if (starExists.length > 0) return res.status(400).json('Course stared by this user')
-        const [scoredCourse, starAvg] = await Promise.all([StarCourse.create({ courseId, star, userId: req.userId }), calcStar(courseId)])
+        const [scoredCourse, starAvg] = await Promise.all([StarCourse.create({ courseId, star: parseInt(star), userId: req.userId }), calcStar(courseId)])
         await Course.findByIdAndUpdate(courseId, { star: starAvg })
         res.status(201).json(scoredCourse)
     } catch (error) {
+        console.log(error)
         res.status(500).json(error)
     }
 }
@@ -28,6 +31,7 @@ export const updateStar = async (req, res) => {
     try {
         const { star, courseId } = req.body
         const staredId = req.params.id
+        if (!possibleStarValues.includes(+star)) return res.status(400).json('Star value is incorrect');
         const starExists = await StarCourse.find({ courseId, userId: req.userId });
         if (starExists.length === 0) return res.status(404).json('This course not stared');
         const [updatedStar, starAvg] = await Promise.all([
