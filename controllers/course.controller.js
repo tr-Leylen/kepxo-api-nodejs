@@ -93,8 +93,9 @@ export const getTeacherCourses = async (req, res) => {
 
 export const getRecommendedCourses = async (req, res) => {
     try {
-        const courses = await Course.find({ accepted: true, star: 5 }).limit(10)
-        courses.sort(() => Math.random() - 0.5)
+        const courses = await Course.find({ accepted: true })
+            .sort({ 'score': -1 })
+            .limit(10)
         res.status(200).json(courses)
     } catch (error) {
         res.status(500).json('Internal Server Error')
