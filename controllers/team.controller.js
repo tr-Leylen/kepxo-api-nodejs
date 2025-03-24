@@ -112,3 +112,13 @@ export const exitMember = async (req, res) => {
         res.status(500).json(error)
     }
 }
+
+export const findTeamByMemberId = async (req, res) => {
+    try {
+        const memberId = req.userId
+        const team = await Team.find({ members: memberId })
+        res.status(200).json(team)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
