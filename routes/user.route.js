@@ -6,7 +6,7 @@ import { verifyAdmin } from '../utils/AdminMiddleware.js';
 
 const router = express.Router()
 
-router.put("/:id", verifyUser, updateUser)
+router.put("/:id", verifyLogin, updateUser)
 router.delete("/:id", verifyUser, deleteUser)
 router.get("/view/:id", getUser)
 router.get("/followers/:id", getFollowers)
